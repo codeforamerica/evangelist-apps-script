@@ -1,6 +1,7 @@
 function sendEmail() {
   loadAll();
   compareDatabaseAndSalesforce();
+  databaseTestBrigadeURLs();
   
   var contents = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.todo).getDataRange().getValues();
   var idxMissingSalesforce = contents[0].indexOf("Missing from Salesforce");

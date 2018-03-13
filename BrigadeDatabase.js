@@ -208,3 +208,33 @@ function compareDatabaseAndSalesforce() {
     }
   }
 }
+
+/*
+ * Test all URLs in the directory (database).
+ */
+function databaseTestBrigadeURLs() {
+  var database = SpreadsheetApp.openById(DATABASE_DOC_ID).getSheetByName(DATABASE_SHEET_NAME);
+
+  var databaseHeaders = database.getRange(2, 1, 1, database.getLastColumn()).getValues()[0];
+  var databaseContents = database.getRange(3, 1, database.getLastRow(), database.getLastColumn())
+    .getValues();
+
+  for (var i in databaseContents) {
+    var row = databaseContents[i];
+    var brigadeName = row[databaseHeaders.indexOf("Brigade Name")];
+    var url = row[databaseHeaders.indexOf("Website")];
+
+    if (!url || !url.length) {
+      continue;
+    }
+
+    try {
+      var resp = UrlFetchApp.fetch(url);
+      if (resp.getResponseCode() >= 300) {
+        Logger.log("Brigade Website Error: " + brigadeName + "'s website " + url + " returned status " + resp.getResponseCode());
+      }
+    } catch (ex) {
+      Logger.log("Brigade Website Error: " + brigadeName + "'s website " + url + " returned error " + ex.message);
+    }
+  }
+}
