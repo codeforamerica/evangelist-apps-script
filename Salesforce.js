@@ -71,6 +71,18 @@ function salesforceListBrigades() {
   return response.records;
 }
 
+function salesforceListDonations() {
+  var soql = "SELECT Account.Name, Account.npe01__One2OneContact__r.Name, Account.npe01__One2OneContact__r.Email, Amount, Brigade_Designation_lookup__r.Name, Description, CloseDate FROM Opportunity WHERE Brigade_Designation_lookup__c != null ORDER BY CloseDate DESC NULLS FIRST";
+  var response = salesforceRequest('/query?q=' + encodeURIComponent(soql));
+
+  if (response.error) {
+    Logger.log("ERROR: " + response.error);
+    return;
+  }
+
+  return response.records;
+}
+
 function salesforceAuthorize() {
   var oauth = salesforceGetService();
   if (oauth.hasAccess()) {    

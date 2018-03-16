@@ -4,6 +4,7 @@ var SHEET_NAMES = {
   meetupEvents: 'AUTO:meetup-events',
   meetupMembers: 'AUTO:meetup-members',
   salesforce: 'AUTO:salesforce',
+  salesforceDonations: 'AUTO:salesforce-donations',
   brigadeleads: 'AUTO:brigadeleads'
 }
 
@@ -150,6 +151,51 @@ function loadSalesforceData() {
 
   sheet.setFrozenRows(1);
   return brigades;
+}
+
+var SALESFORCE_DONATION_HEADERS = [
+  'Date', 'Name', 'Email', 'Amount', 'Description', 'Brigade Designation'
+];
+function loadSalesforceDonationData() {
+  var salesforceDonations = salesforceListDonations();
+  var donations = [];
+
+  for (var i in salesforceDonations) {
+    var donation = salesforceDonations[i];
+
+    donations.push([
+      donation.CloseDate,
+      // name: (use contact name if possible, fall back on account name otherwise)
+      donation.Account.npe01__One2OneContact__r ? donation.Account.npe01__One2OneContact__r.Name : donation.Account.Name,
+      // email: (use contact email if possible, can't fall back because Accounts don't have email)
+      donation.Account.npe01__One2OneContact__r ? donation.Account.npe01__One2OneContact__r.Email : '',
+      donation.Amount,
+      donation.Description,
+      donation.Brigade_Designation_lookup__r.Name
+    ]);
+  }
+
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforceDonations);
+
+  // sanity check, if there is no data let's bail and leave the sheet unchanged
+  //   (this happens for example when we hit salesforce API limit)
+  if (!donations.length) {
+    Logger.log("ERROR: No donations returned from salesforce. Bailing.");
+    var existingDonations = sheet.getRange(2, 1, sheet.getLastRow(), SALESFORCE_DONATION_HEADERS.length).getValues();
+    return existingDonations;
+  }
+
+  sheet
+    .clear()
+    .getRange(1, 1, 1, SALESFORCE_DONATION_HEADERS.length)
+      .setFontWeight("bold")
+      .setValues([SALESFORCE_DONATION_HEADERS])
+    .getSheet()
+      .getRange(2, 1, donations.length, SALESFORCE_DONATION_HEADERS.length)
+      .setValues(donations);
+
+  sheet.setFrozenRows(1);
+  return donations;
 }
 
 /*
