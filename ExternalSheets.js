@@ -21,7 +21,7 @@ function _findOrCreateExternalSheet(id, name) {
   return externalSheet;
 }
 
-function meetupProSyncToExternalSheets() {
+function externalSheetSyncMeetup() {
   var sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.meetupMembers);
   var memberHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   var members = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
