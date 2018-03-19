@@ -12,19 +12,19 @@ Originally, this started off simple, with just a script to sync Salesforce and t
 
 Currenty, the code in this repo does the following:
 
-* *Salesforce:* Import brigades
+* **Salesforce:** Import brigades
   * Identify brigades missing a primary contact
   * Cross-reference primary contact email addresse with `brigadeleads@` mailing list.
-* *[brigade-information repo][binfo]*: Import brigades
-* *Weekly email*: Send a list of data inconsistencies, including:
+* **[brigade-information repo][binfo]**: Import brigades
+* **Weekly email**: Send a list of data inconsistencies, including:
   * Brigades missing from Salesforce or the [brigade-information repo][binfo]
   * Primary contact emails that are missing or need to be added to `brigadeleads@` list.
-* *Directory:* Populate the public [Brigade Contact Directory][http://c4a.me/brigades] as well as [the internal version][https://docs.google.com/spreadsheets/d/12o5V69MMiYO6sls5V4FLN1_gtgquVlr3mzrncHvQZzI/edit?usp=sharing] that includes the non-public Primary Contact Emails of brigade captains.
-* *Meetup Pro:* Import attendee data from our Meetup account
+* **Directory:** Populate the public [Brigade Contact Directory][http://c4a.me/brigades] as well as [the internal version][https://docs.google.com/spreadsheets/d/12o5V69MMiYO6sls5V4FLN1_gtgquVlr3mzrncHvQZzI/edit?usp=sharing] that includes the non-public Primary Contact Emails of brigade captains.
+* **Meetup Pro:** Import attendee data from our Meetup account
 
 The following features are works in progress:
 
-* *External Sheets*: Sync Meetup attendee data to external spreadsheets for purposes of sharing email addresses with brigades.
+* **External Sheets**: Sync Meetup attendee data to external spreadsheets for purposes of sharing email addresses with brigades.
 
 ## Setup / Instructions:
 ```bash
