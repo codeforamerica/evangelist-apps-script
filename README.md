@@ -39,3 +39,9 @@ git commit
 
 
 [binfo]: https://github.com/codeforamerica/brigade-information
+
+## TODO:
+* **Open Source**: Open this repo up for transparency.
+  * Verify that all access keys and such are removed permanently from history and that all linked documents are inaccessible to the pubilc.
+* **Test Coverage:** Figure out a way to test these scripts.
+* **Babel:** Make a build pipeline which allows us to use fancier javascript by compiling down to Apps Script's old dialect.
