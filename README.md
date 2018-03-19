@@ -19,7 +19,7 @@ Currenty, the code in this repo does the following:
 * **Weekly email**: Send a list of data inconsistencies, including:
   * Brigades missing from Salesforce or the [brigade-information repo][binfo]
   * Primary contact emails that are missing or need to be added to `brigadeleads@` list.
-* **Directory:** Populate the public [Brigade Contact Directory][http://c4a.me/brigades] as well as [the internal version][https://docs.google.com/spreadsheets/d/12o5V69MMiYO6sls5V4FLN1_gtgquVlr3mzrncHvQZzI/edit?usp=sharing] that includes the non-public Primary Contact Emails of brigade captains.
+* **Directory:** Populate the public [Brigade Contact Directory](http://c4a.me/brigades) as well as [the internal version](https://docs.google.com/spreadsheets/d/12o5V69MMiYO6sls5V4FLN1_gtgquVlr3mzrncHvQZzI/edit?usp=sharing) that includes the non-public Primary Contact Emails of brigade captains.
 * **Meetup Pro:** Import attendee data from our Meetup account
 
 The following features are works in progress:
