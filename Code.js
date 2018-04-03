@@ -281,3 +281,32 @@ function createUI() {
       .addToUi();
   } catch (e) {}
 }
+
+function createTriggers() {
+  // remove all existing triggers:
+  var existingTriggers = ScriptApp.getProjectTriggers();
+  for (var i in existingTriggers) {
+    ScriptApp.deleteTrigger(existingTriggers[i]);
+  }
+
+  // create new triggers:
+  ScriptApp.newTrigger("importExternalSalesforceToDirectory")
+    .timeBased().everyHours(1).create();                        // hourly
+  ScriptApp.newTrigger("importInternalSalesforceToDirectory")
+    .timeBased().everyHours(1).create();                        // hourly
+  ScriptApp.newTrigger("meetupProSyncMembersIncremental")
+    .timeBased().everyHours(1).create();                        // hourly
+  ScriptApp.newTrigger("loadSalesforceData")
+    .timeBased().everyHours(1).create();                        // hourly
+
+  ScriptApp.newTrigger("loadSalesforceDonationData")
+    .timeBased().everyDays(1).atHour(19).create();              // 7pm
+
+  ScriptApp.newTrigger("externalSheetSyncAll")
+    .timeBased().everyDays(1).atHour(20).create();              // 8pm
+
+  ScriptApp.newTrigger("meetupProSyncMembersAll")
+    .timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();              // 7am Monday
+  ScriptApp.newTrigger("sendEmail")
+    .timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();              // 7am Monday
+}
