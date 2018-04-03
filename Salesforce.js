@@ -83,6 +83,18 @@ function salesforceListDonations() {
   return response.records;
 }
 
+function salesforceListBrigadeLeaders() {
+  var soql = "SELECT npe5__Contact__r.Name, npe5__Contact__r.Email, npe5__Organization__r.Name, CreatedDate FROM npe5__Affiliation__c WHERE Captain_Co_Captain__c = TRUE AND IsDeleted = FALSE AND npe5__Status__c = 'Current'";
+  var response = salesforceRequest('/query?q=' + encodeURIComponent(soql));
+
+  if (response.error) {
+    Logger.log("ERROR: " + response.error);
+    return;
+  }
+
+  return response.records;
+}
+
 function salesforceAuthorize() {
   var oauth = salesforceGetService();
   if (oauth.hasAccess()) {    

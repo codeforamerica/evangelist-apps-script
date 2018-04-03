@@ -5,7 +5,9 @@ var SHEET_NAMES = {
   meetupMembers: 'AUTO:meetup-members',
   salesforce: 'AUTO:salesforce',
   salesforceDonations: 'AUTO:salesforce-donations',
+  salesforceBrigadeLeaders: 'AUTO:salesforce-brigade-leaders',
   brigadeleads: 'AUTO:brigadeleads'
+
 }
 
 function loadAll() {
@@ -199,6 +201,58 @@ function loadSalesforceDonationData() {
 }
 
 /*
+ * Pull a list of any Contact in salesforce that's associated with a Brigade
+ * with the "Captain/Co-Captain" flag set. We set this based on who attends the
+ * brigade onboarding meeting (among other signs that someone is a brigade leader).
+ *
+ * This is essentially copied from the other salesforce data fetching methods.
+ */
+SALESFORCE_BRIGADE_LEADERS_HEADERS = [
+  'Name', 'Email', 'Brigade Name', 'Affiliation Creation Date'
+];
+function loadSalesforceBrigadeLeaders() {
+  var salesforceLeaders = salesforceListBrigadeLeaders();
+  var leaders = [];
+
+  for (var i in salesforceLeaders) {
+    var leader = salesforceLeaders[i];
+
+    leaders.push([
+      leader.npe5__Contact__r.Name,
+      leader.npe5__Contact__r.Email,
+      leader.npe5__Organization__r.Name,
+      leader.CreatedDate
+    ]);
+  }
+
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforceBrigadeLeaders);
+
+  // sanity check, if there is no data let's bail and leave the sheet unchanged
+  //   (this happens for example when we hit salesforce API limit)
+  if (!leaders.length) {
+    Logger.log("ERROR: No brigade leaders returned from salesforce. Bailing.");
+    return;
+  }
+
+  sheet
+    .clear()
+    .getRange(1, 1, 1, SALESFORCE_BRIGADE_LEADERS_HEADERS.length)
+      .setFontWeight("bold")
+      .setValues([SALESFORCE_BRIGADE_LEADERS_HEADERS])
+    .getSheet()
+      .getRange(2, 1, leaders.length, SALESFORCE_BRIGADE_LEADERS_HEADERS.length)
+      .setValues(leaders);
+
+  sheet.setFrozenRows(1);
+  sheet.autoResizeColumn(SALESFORCE_BRIGADE_LEADERS_HEADERS.indexOf('Name') + 1);
+  sheet.autoResizeColumn(SALESFORCE_BRIGADE_LEADERS_HEADERS.indexOf('Email') + 1);
+  sheet.getRange(1, SALESFORCE_BRIGADE_LEADERS_HEADERS.indexOf('Affiliation Creation Date') + 1, sheet.getLastRow(), 1)
+      .setNumberFormat("m/d/yyyy");
+
+  return leaders;
+}
+
+/*
 Note: the GroupsApp service does not expose an API for checking the list of
 all subscribed addresses, only the subscribed addresses _with a Google Account_.
 It appears that the `hasUser` method returns true/false regardless of whether the
@@ -225,6 +279,16 @@ function loadGroupMembers(brigadeResults) {
     }
   }
   
+  // ... add in any emails for co-captains that aren't the primary contact:
+  var salesforceBrigadeLeaders = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforceBrigadeLeaders).getDataRange().getValues();
+  var salesforceBrigadeLeadersHeaders = salesforceBrigadeLeaders.shift();
+  for (var i in salesforceBrigadeLeaders) {
+    var brigadeLeaderEmail = salesforceBrigadeLeaders[i][salesforceBrigadeLeadersHeaders.indexOf('Email')];
+    if (brigadeLeaderEmail && brigadeLeaderEmail.length && emails.indexOf(brigadeLeaderEmail) === -1) {
+      emails.push(brigadeLeaderEmail);
+    }
+  }
+
   // Now, loop over the emails and check each one to see if it's subscribed
   var usersToAppend = []; 
   for (var i in emails) {
@@ -301,6 +365,9 @@ function createTriggers() {
 
   ScriptApp.newTrigger("loadSalesforceDonationData")
     .timeBased().everyDays(1).atHour(19).create();              // 7pm
+  ScriptApp.newTrigger("loadSalesforceBrigadeLeaders")
+    .timeBased().everyDays(1).atHour(19).create();              // 7pm
+
 
   ScriptApp.newTrigger("externalSheetSyncAll")
     .timeBased().everyDays(1).atHour(20).create();              // 8pm
