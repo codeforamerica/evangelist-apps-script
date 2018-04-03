@@ -2,11 +2,13 @@
  * Code related to syndicating the results into Brigade-specific external sheets.
  *
  */
-var EXTERNAL_SHEETS = {
-  // urlname   : google sheet id
-  "OpenOakland": "134_69wuLsB6kdOA3HctirpHRwwzxtSKun4xmyJqnFXM",
-  "Code-for-Philly": "1Jx39wrbME94f30K8cADoBUCvQvWPtWssZpV978skb_s",
-};
+var EXTERNAL_SHEETS = [
+  { sheetId: "134_69wuLsB6kdOA3HctirpHRwwzxtSKun4xmyJqnFXM", name: "Open Oakland", meetupUrlname: "OpenOakland" },
+  { sheetId: "1Jx39wrbME94f30K8cADoBUCvQvWPtWssZpV978skb_s", name: "Code for Philly", meetupUrlname: "Code-for-Philly" },
+  { sheetId: "1UWcu6s1uNAJSYfj5NEdd7AKSQkTukVqwkLPRoiNs50Q", name: "Open Uptown", meetupUrlname: 'openuptown' },
+  { sheetId: "1HQpWftpSvL2I7qwuO1q8fwkyo90L-sEH-_6eR9aPM4A", name: "Code for Orlando", meetupUrlname: 'Code-For-Orlando' },
+  { sheetId: "1T4ZGlAgbTMMR9wf6u7DHs4uhhk7-ldiuanmgiZByhhQ", name: "Open Toledo", meetupUrlname: 'Open-Toledo' }
+];
 
 /*
  * Open an external spreadsheet and return an existing sheet by name
@@ -18,25 +20,71 @@ function _findOrCreateExternalSheet(id, name) {
   if (!externalSheet) {
     var externalSheet = doc.insertSheet(name);
   }
+
   return externalSheet;
 }
 
+function _verifyExternalSheets() {
+  for (var i in EXTERNAL_SHEETS) {
+    var brigade = EXTERNAL_SHEETS[i];
+    if (!brigade.sheetId) {
+      throw new Error("EXTERNAL_SHEETS item missing 'sheetId': " + JSON.stringify(brigade));
+    }
+    if (!brigade.name) {
+      throw new Error("EXTERNAL_SHEETS item missing 'name': " + JSON.stringify(brigade));
+    }
+    if (!brigade.meetupUrlname) {
+      throw new Error("EXTERNAL_SHEETS item missing 'meetupUrlname': " + JSON.stringify(brigade));
+    }
+  }
+}
+
+function externalSheetSyncAll() {
+  _verifyExternalSheets();
+
+  externalSheetAddInstructions();
+  externalSheetSyncMeetup();
+  externalSheetSyncDonations();
+}
+
+function externalSheetAddInstructions() {
+  for (var i in EXTERNAL_SHEETS) {
+    var brigade = EXTERNAL_SHEETS[i];
+    var externalSheet = _findOrCreateExternalSheet(brigade.sheetId, "[AUTO] Instructions");
+
+    var INSTRUCTIONS = [
+      ['Notes:'],
+      ['- Welcome to your "Brigade Dashboard". This is an attempt to share data that could be useful to your day-to-day running of your brigade.'],
+      ['- This is a pilot, send feedback to tdooner@codeforamerica.org'],
+      ['- What other info would be helpful to have in here?'],
+      ['- Feel free to share with brigade leadership at ' + brigade.name],
+      ['- This spreadsheet updates once a day'],
+      ["- Don't rename or modify the \"[AUTO]\" tabs (other than that, you can do whatever)"]
+    ];
+
+    externalSheet.clear();
+    externalSheet.getRange(1, 1, INSTRUCTIONS.length, INSTRUCTIONS[0].length)
+      .setValues(INSTRUCTIONS);
+  }
+}
+
 function externalSheetSyncMeetup() {
-  var sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.meetupMembers);
+  var sheet = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID).getSheetByName(SHEET_NAMES.meetupMembers);
   var memberHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   var members = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
   
-  for (var brigade in EXTERNAL_SHEETS) {
-    Logger.log("Syncing membership for " + brigade);
-    var externalSheet = _findOrCreateExternalSheet(EXTERNAL_SHEETS[brigade], "[AUTO] Members");
+  for (var i in EXTERNAL_SHEETS) {
+    var brigade = EXTERNAL_SHEETS[i];
+    Logger.log("Syncing membership for " + brigade.name);
+    var externalSheet = _findOrCreateExternalSheet(brigade.sheetId, "[AUTO] Members");
     
     var brigadeMembers = [];
     
-    for (var i in members) {
-      var member = members[i];
+    for (var j in members) {
+      var member = members[j];
       var memberChapters = JSON.parse(member[memberHeaders.indexOf("Chapters")]);
-      for (var j in memberChapters) {
-        if (memberChapters[j].urlname === brigade) {
+      for (var k in memberChapters) {
+        if (memberChapters[k].urlname === brigade.meetupUrlname) {
           brigadeMembers.push([
             member[memberHeaders.indexOf("Meetup ID")],
             member[memberHeaders.indexOf("Full Name")],
@@ -48,12 +96,15 @@ function externalSheetSyncMeetup() {
         }
       }
     }
+
+    Logger.log("  found " + brigadeMembers.length + " members");
     
+    var headers = ['Meetup ID', 'Name', 'Email', 'Events Attended', 'Join Time', 'Last Access Time', '', "Last Updated: " + (new Date()).toDateString()];
     externalSheet.clearContents();
     externalSheet.getRange(1, 1, 1, 8)
-      .setValues([
-        ['Meetup ID', 'Name', 'Email', 'Events Attended', 'Join Time', 'Last Access Time', '', "Last Updated: " + (new Date()).toDateString()],
-      ]);
+      .setFontWeight("bold")
+      .setValues([headers]);
+    externalSheet.setFrozenRows(1);
     
     if (!brigadeMembers.length) {
       return;
@@ -61,5 +112,62 @@ function externalSheetSyncMeetup() {
     externalSheet
       .getRange(2, 1, brigadeMembers.length, brigadeMembers[0].length)
       .setValues(brigadeMembers);
+
+    // resize and format columns
+    externalSheet.getRange(1, headers.indexOf('Join Time') + 1, externalSheet.getLastRow(), 1)
+      .setNumberFormat("m/d/yyyy h:mm:ss am/pm");
+    externalSheet.getRange(1, headers.indexOf('Last Access Time') + 1, externalSheet.getLastRow(), 1)
+      .setNumberFormat("m/d/yyyy h:mm:ss am/pm");
+    externalSheet.autoResizeColumn(headers.indexOf('Name') + 1);
+    externalSheet.autoResizeColumn(headers.indexOf('Email') + 1);
+    externalSheet.autoResizeColumn(headers.indexOf('Join Time') + 1);
+    externalSheet.autoResizeColumn(headers.indexOf('Last Access Time') + 1);
+  }
+}
+
+function externalSheetSyncDonations() {
+  var sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforceDonations);
+  var donationHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var donations = sheet.getRange(2, 1, sheet.getLastRow(), sheet.getLastColumn()).getValues();
+
+  for (var i in EXTERNAL_SHEETS) {
+    var brigade = EXTERNAL_SHEETS[i];
+    var externalSheet = _findOrCreateExternalSheet(brigade.sheetId, "[AUTO] Donations");
+    var brigadeDonations = [];
+
+    for (var j in donations) {
+      var donationBrigadeName = donations[j][donationHeaders.indexOf("Brigade Designation")];
+      if (donationBrigadeName === brigade.name) {
+        brigadeDonations.push([
+          donations[j][donationHeaders.indexOf('Date')],
+          donations[j][donationHeaders.indexOf('Name')],
+          donations[j][donationHeaders.indexOf('Email')],
+          donations[j][donationHeaders.indexOf('Amount')],
+          donations[j][donationHeaders.indexOf('Description')],
+        ]);
+      }
+    }
+
+    var headers = ['Date', 'Name', 'Email', 'Amount', 'Description'];
+    externalSheet.clearContents();
+    externalSheet.getRange(1, 1, 1, headers.length)
+      .setFontWeight("bold")
+      .setValues([headers]);
+    externalSheet.setFrozenRows(1);
+
+    if (!brigadeDonations.length) {
+      continue;
+    }
+
+    // populate actual data
+    externalSheet
+      .getRange(2, 1, brigadeDonations.length, brigadeDonations[0].length)
+      .setValues(brigadeDonations);
+
+    // resize and format columns
+    externalSheet.autoResizeColumn(headers.indexOf('Name') + 1);
+    externalSheet.autoResizeColumn(headers.indexOf('Email') + 1);
+    externalSheet.getRange(1, headers.indexOf('Amount') + 1, externalSheet.getLastRow(), 1)
+      .setNumberFormat("$0.00");
   }
 }
