@@ -294,7 +294,7 @@ function loadGroupMembers(brigadeResults) {
   for (var i in emails) {
     var groupHasUser;
     
-    if (!MANUAL_OVERRIDE_ADD_MEMBER.indexOf(emails[i])) {
+    if (MANUAL_OVERRIDE_ADD_MEMBER.indexOf(emails[i]) === -1) {
       try {
         groupHasUser = group.hasUser(emails[i]);
       } catch (e) {
