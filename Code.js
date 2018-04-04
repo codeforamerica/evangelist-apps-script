@@ -23,19 +23,19 @@ function loadBrigadeInformation() {
   var infoResponse = UrlFetchApp.fetch("https://raw.githubusercontent.com/codeforamerica/brigade-information/master/organizations.json");
   var info = JSON.parse(infoResponse);
   var brigades = [];
-  
+
   for (var i in info) {
     var brigade = info[i];
-    
+
     // filter to only the official CfA Brigades
     if (brigade['tags'].indexOf('Code for America') === -1 ||
         brigade['tags'].indexOf('Brigade') === -1) {
       continue;
     }
-    
+
     brigades.push([brigade['name']]);
   }
-    
+
   var sheet = SpreadsheetApp.getActive()
     .getSheetByName(SHEET_NAMES.brigadeInfo);
   sheet.clear()
@@ -51,18 +51,18 @@ var SEVENTY_YEARS_IN_DAYS = 25569; // DATEVALUE("1970/1/1")
 function loadMeetupData() {
   var pageUrl = "http://api.codeforamerica.org/api/events/upcoming_events?per_page=200";
   var eventsToAppend = [];
-  
+
   while (pageUrl) {
     var eventResponse = JSON.parse(UrlFetchApp.fetch(pageUrl));
     var events = eventResponse['objects'];
-    
+
     for (var i in events) {
       var event = events[i];
       var start = event['start_time'];
       var startParsed = Date.parse(
         start.substring(0, 10) + "T" + start.substring(11, 19) + start.substring(20, 25)
       ) / 1000 / 86400.0 + SEVENTY_YEARS_IN_DAYS;
-      
+
       eventsToAppend.push([
         event['organization_name'],
         event['name'],
@@ -71,7 +71,7 @@ function loadMeetupData() {
         event['rsvps']
       ]);
     }
-    
+
     pageUrl = eventResponse.pages.next;
   }
 
@@ -88,7 +88,7 @@ To set up Salesforce sync, take the following steps:
 2. Create a "Connected App" with the Callback URL set to
 
    https://script.google.com/macros/d/{script_id}/usercallback
-   
+
    where {script_id} is found in File > Project properties
 3. Copy the App's Consumer Key and Consumer Secret into "Script Properties"
    in the "File > Project properties" dialog
@@ -106,16 +106,16 @@ var PARTNER_BRIGADES = [ // grandfather these in for now
 function loadSalesforceData() {
   var salesforceBrigades = salesforceListBrigades();
   var brigades = [];
-  
+
   for (var i in salesforceBrigades) {
     var brigade = salesforceBrigades[i];
-    
+
     var isActiveBrigade = brigade.Brigade_Type__c == 'Brigade' && (
        brigade.Brigade_Status__c == 'Active' ||
        (brigade.Brigade_Status__c == 'MOU in Process' && PARTNER_BRIGADES.indexOf(brigade.Name) !== -1) || // Only allow partner brigades in progress
        brigade.Brigade_Status__c == 'Signed MOU'        // TODO: Remove once the MOU signing process is over
       );
-    
+
     brigades.push([
       brigade.Name,
       brigade.Id,
@@ -131,9 +131,9 @@ function loadSalesforceData() {
       brigade.Brigade_Public_Email__c,
     ]);
   }
-  
+
   var sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
-  
+
   // sanity check, if there is no data let's bail and leave the sheet unchanged
   //   (this happens for example when we hit salesforce API limit)
   if (!brigades.length) {
@@ -268,7 +268,7 @@ var MANUAL_OVERRIDE_ADD_MEMBER = [
 function loadGroupMembers(brigadeResults) {
   brigadeResults = brigadeResults || loadSalesforceData();
   var group = GroupsApp.getGroupByEmail("brigadeleads@codeforamerica.org");
-  
+
   // First, populate a list of emails to check
   var activeColumn = SALESFORCE_HEADERS.indexOf("Active?");
   var primaryContactEmail = SALESFORCE_HEADERS.indexOf("Primary Contact Email");
@@ -278,7 +278,7 @@ function loadGroupMembers(brigadeResults) {
       emails.push(brigadeResults[i][primaryContactEmail]);
     }
   }
-  
+
   // ... add in any emails for co-captains that aren't the primary contact:
   var salesforceBrigadeLeaders = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforceBrigadeLeaders).getDataRange().getValues();
   var salesforceBrigadeLeadersHeaders = salesforceBrigadeLeaders.shift();
@@ -290,10 +290,10 @@ function loadGroupMembers(brigadeResults) {
   }
 
   // Now, loop over the emails and check each one to see if it's subscribed
-  var usersToAppend = []; 
+  var usersToAppend = [];
   for (var i in emails) {
     var groupHasUser;
-    
+
     if (MANUAL_OVERRIDE_ADD_MEMBER.indexOf(emails[i]) === -1) {
       try {
         groupHasUser = group.hasUser(emails[i]);
@@ -305,17 +305,17 @@ function loadGroupMembers(brigadeResults) {
     } else {
       groupHasUser = true;
     }
-    
+
     usersToAppend.push([
       emails[i],
       groupHasUser
     ]);
     Utilities.sleep(250);
   }
-  
+
   var SHEET_HEADERS = ["Primary Contact Email", "Is Subscribed To brigadeleads@"];
   var sheet = SpreadsheetApp.getActive()
-    .getSheetByName(SHEET_NAMES.brigadeleads);  
+    .getSheetByName(SHEET_NAMES.brigadeleads);
 
   sheet
     .clear()
@@ -325,7 +325,7 @@ function loadGroupMembers(brigadeResults) {
     .getSheet()
       .getRange(2, 1, usersToAppend.length, usersToAppend[0].length)
       .setValues(usersToAppend);
-  
+
   sheet.setFrozenRows(1);
 }
 

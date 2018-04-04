@@ -2,7 +2,7 @@ var DATABASE_DOC_ID = '1zglhAKDUNnvKindAhb6K_DJaLQ_myRYGKvE2DTYolAQ';
 var DATABASE_INTERNAL_DOC_ID = '12o5V69MMiYO6sls5V4FLN1_gtgquVlr3mzrncHvQZzI';
 var DATABASE_SHEET_NAME = 'Brigade Contact Info';
 var DATABASE_AUTO_SHEET_NAME = 'Brigade Contact Info';
-    
+
 // check fields for equality
 var FIELDS = [
   // salesforce column name, database column name
@@ -32,7 +32,7 @@ function importSalesforceToDirectory(isInternal) {
     // 'Meeting Location',
     'Salesforce Account ID'
   ];
-  
+
   var database = SpreadsheetApp
     .openById(isInternal ? DATABASE_INTERNAL_DOC_ID : DATABASE_DOC_ID)
     .getSheetByName(DATABASE_AUTO_SHEET_NAME);
@@ -57,22 +57,22 @@ function importSalesforceToDirectory(isInternal) {
     .setFontWeight("bold");
   database.setFrozenRows(2);
   database.setFrozenColumns(1);
-  
+
   var salesforce = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
   var salesforceHeaders = salesforce.getRange(1, 1, 1, salesforce.getLastColumn()).getValues()[0];
   var salesforceContents = salesforce.getRange(2, 1, salesforce.getLastRow(), salesforce.getLastColumn())
     .getValues();
-  
+
   var brigadesToAdd = [];
-  
+
   for (var i in salesforceContents) {
     var brigade = salesforceContents[i];
     var isActive = brigade[salesforceHeaders.indexOf("Active?")];
-    
+
     if (!isActive) {
       continue;
     }
-    
+
     var primaryContactEmail;
     // if the brigade has given us an explicit public email address, use that (with no "name")
     //   instead of the primary contact in salesforce.
@@ -81,7 +81,7 @@ function importSalesforceToDirectory(isInternal) {
     } else {
       var primaryContactEmail = brigade[salesforceHeaders.indexOf("Primary Contact Email")];
     }
-    
+
     var brigadeObject = {
       'Brigade Name': brigade[salesforceHeaders.indexOf("Name")],
       'City': brigade[salesforceHeaders.indexOf("Location")].split(", ")[0],
@@ -96,15 +96,15 @@ function importSalesforceToDirectory(isInternal) {
       'Meetup URL': brigade[salesforceHeaders.indexOf("Meetup Link")],
       'Salesforce Account ID': brigade[salesforceHeaders.indexOf("Salesforce ID")]
     };
-    
+
     var brigadeRow = [];
     for (var j in HEADERS) {
       brigadeRow.push(brigadeObject[HEADERS[j]] || '');
     }
-    
+
     brigadesToAdd.push(brigadeRow);
   }
-  
+
   database.getRange(3, 1, brigadesToAdd.length, HEADERS.length).setValues(brigadesToAdd);
 }
 
@@ -119,18 +119,18 @@ function importInternalSalesforceToDirectory() {
 function compareDatabaseAndSalesforce() {
   var database = SpreadsheetApp.openById(DATABASE_DOC_ID).getSheetByName(DATABASE_SHEET_NAME);
   var salesforce = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
-  
+
   var salesforceHeaders = salesforce.getRange(1, 1, 1, salesforce.getLastColumn()).getValues()[0];
   var salesforceContents = salesforce.getRange(2, 1, salesforce.getLastRow(), salesforce.getLastColumn())
     .getValues();
-  
+
   var databaseHeaders = database.getRange(2, 1, 1, database.getLastColumn()).getValues()[0];
   var databaseContents = database.getRange(3, 1, database.getLastRow(), database.getLastColumn())
     .getValues();
-  
+
   for (var i in databaseContents) {
     var brigade = databaseContents[i];
-    
+
     // attempt to find the brigade in the salesforce list
     //   by matching the Salesforce ID
     var brigadeInSalesforce = null;
@@ -140,7 +140,7 @@ function compareDatabaseAndSalesforce() {
       var databaseId = brigade[databaseHeaders.indexOf("Salesforce Account ID")];
       var salesforceName = b[salesforceHeaders.indexOf("Name")];
       var databaseName = brigade[databaseHeaders.indexOf("Brigade Name")];
-      
+
       if (salesforceId === databaseId) {
         brigadeInSalesforce = b;
       } else if (salesforceName === databaseName) {
@@ -148,7 +148,7 @@ function compareDatabaseAndSalesforce() {
         Logger.log("Found by fallback name match: " + salesforceName);
       }
     }
-    
+
     if (!brigadeInSalesforce) {
       Logger.log("Could not find brigade in salesforce: " + brigade[0]);
       continue;
@@ -162,10 +162,10 @@ function compareDatabaseAndSalesforce() {
           different.push([FIELDS[j][0], brigadeInSalesforce[salesforceHeaders.indexOf(FIELDS[j][0])], brigade[databaseHeaders.indexOf(FIELDS[j][1])]]);
       }
     }
-    
+
     if (different.length) {
       Logger.log(brigade[databaseHeaders.indexOf("Brigade Name")] + ":");
-      
+
       for (var j in different) {
         var difference = different[j];
         if (difference[1] && !difference[2]) {
@@ -178,16 +178,16 @@ function compareDatabaseAndSalesforce() {
       }
     }
   }
-   
+
   // find records that are in salesforce but not the database
   for (var i in salesforceContents) {
     var brigade = salesforceContents[i];
     var isActive = brigade[salesforceHeaders.indexOf("Active?")];
-    
+
     if (!isActive) {
       continue;
     }
-    
+
     var brigadeInDatabase = null;
     for (var j in databaseContents) {
       var b = databaseContents[j];
@@ -195,14 +195,14 @@ function compareDatabaseAndSalesforce() {
       var databaseId = b[databaseHeaders.indexOf("Salesforce Account ID")];
       var salesforceName = brigade[salesforceHeaders.indexOf("Name")];
       var databaseName = b[databaseHeaders.indexOf("Brigade Name")];
-      
+
       if (salesforceId === databaseId) {
         brigadeInDatabase = b;
       } else if (salesforceName === databaseName) {
         brigadeInDatabase = b;
       }
     }
-    
+
     if (!brigadeInDatabase) {
       Logger.log("Missing Brigade in Database: " + brigade[salesforceHeaders.indexOf("Name")]);
     }

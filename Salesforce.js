@@ -1,12 +1,12 @@
 function salesforceGetService() {
   var sfConsumerKey = ScriptProperties.getProperty("SALESFORCE_CONSUMER_KEY");
   var sfConsumerSecret = ScriptProperties.getProperty("SALESFORCE_CONSUMER_SECRET");
-  
+
   if (!sfConsumerKey || !sfConsumerSecret) {
     Logger.log("Set SALESFORCE_CONSUMER_KEY and SALESFORCE_CONSUMER_SECRET in Script Properties");
     return;
   }
-  
+
   return OAuth2.createService('salesforce')
       // Set the endpoint URLs, which are the same for all sfdc services.
       .setAuthorizationBaseUrl('https://login.salesforce.com/services/oauth2/authorize')
@@ -23,8 +23,8 @@ function salesforceGetService() {
 function salesforceRequest(apiEndpoint) {
   var oauth = salesforceGetService();
   var token = oauth.getToken();
-  
-  if (oauth.hasAccess()) {   
+
+  if (oauth.hasAccess()) {
     // manually check for token expiry since the salesforce token doesn't have
     // an "expires_in" field
     var SALESFORCE_TOKEN_TIMEOUT_SECONDS = 2 * 60 * 60; // tokens are valid for 2 hours
@@ -40,15 +40,15 @@ function salesforceRequest(apiEndpoint) {
         Authorization: 'Bearer ' + oauth.getAccessToken()
       }
     }
-    
+
     try {
-      var response = UrlFetchApp.fetch(queryUrl,options); 
+      var response = UrlFetchApp.fetch(queryUrl,options);
     } catch (e) {
       return {
         error: e.message,
       }
     }
-    
+
     var queryResult = Utilities.jsonParse(response.getContentText());
     return queryResult;
   } else {
@@ -62,12 +62,12 @@ function salesforceListBrigades() {
   var soql = "SELECT Id, Name, Brigade_Type__c, Brigade_Status__c, npe01__One2OneContact__r.Name, npe01__One2OneContact__r.Email, Brigade_Public_Email__c, Website, Site_Link__c, MeetUp_Link__c, Brigade_Location__c, Organization_Twitter__c, Github_URL__c, Facebook_Page_URL__c" +
     " FROM Account WHERE Brigade_Type__c = 'Brigade' ORDER BY Name";
   var response = salesforceRequest('/query?q=' + encodeURIComponent(soql));
-  
+
   if (response.error) {
     Logger.log("ERROR: " + response.error);
     return;
   }
-  
+
   return response.records;
 }
 
@@ -97,8 +97,8 @@ function salesforceListBrigadeLeaders() {
 
 function salesforceAuthorize() {
   var oauth = salesforceGetService();
-  if (oauth.hasAccess()) {    
-    Logger.log("Looks like you've got access already!"); 
+  if (oauth.hasAccess()) {
+    Logger.log("Looks like you've got access already!");
   } else {
     var authorizationUrl = oauth.getAuthorizationUrl();
     var template = HtmlService.createTemplate(

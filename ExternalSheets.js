@@ -72,14 +72,14 @@ function externalSheetSyncMeetup() {
   var sheet = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID).getSheetByName(SHEET_NAMES.meetupMembers);
   var memberHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   var members = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
-  
+
   for (var i in EXTERNAL_SHEETS) {
     var brigade = EXTERNAL_SHEETS[i];
     Logger.log("Syncing membership for " + brigade.name);
     var externalSheet = _findOrCreateExternalSheet(brigade.sheetId, "[AUTO] Members");
-    
+
     var brigadeMembers = [];
-    
+
     for (var j in members) {
       var member = members[j];
       var memberChapters = JSON.parse(member[memberHeaders.indexOf("Chapters")]);
@@ -98,14 +98,14 @@ function externalSheetSyncMeetup() {
     }
 
     Logger.log("  found " + brigadeMembers.length + " members");
-    
+
     var headers = ['Meetup ID', 'Name', 'Email', 'Events Attended', 'Join Time', 'Last Access Time', '', "Last Updated: " + (new Date()).toDateString()];
     externalSheet.clearContents();
     externalSheet.getRange(1, 1, 1, 8)
       .setFontWeight("bold")
       .setValues([headers]);
     externalSheet.setFrozenRows(1);
-    
+
     if (!brigadeMembers.length) {
       return;
     }

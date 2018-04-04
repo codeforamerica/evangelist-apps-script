@@ -2,14 +2,14 @@ function sendEmail() {
   loadAll();
   compareDatabaseAndSalesforce();
   databaseTestBrigadeURLs();
-  
+
   var contents = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.todo).getDataRange().getValues();
   var idxMissingSalesforce = contents[0].indexOf("Missing from Salesforce");
   var idxMissingBrigadeInfo = contents[0].indexOf("Missing from brigade-information");
   var idxMissingPrimaryContact = contents[0].indexOf("Missing Primary Contact");
   var idxAddBrigadeLeads = contents[0].indexOf("Add to brigadeleads@");
   contents.shift(); // remove header row
-  
+
   var body = "<p>Missing from Salesforce:</p><ul>";
   for (var i in contents) {
     if (contents[i][idxMissingSalesforce] && contents[i][idxMissingSalesforce].length) {
@@ -17,7 +17,7 @@ function sendEmail() {
     }
   }
   body += "</ul>";
-  
+
   body += "<p>Missing from brigade-information repo:</p><ul>";
   for (var i in contents) {
     if (contents[i][idxMissingBrigadeInfo] && contents[i][idxMissingBrigadeInfo].length) {
@@ -25,7 +25,7 @@ function sendEmail() {
     }
   }
   body += "</ul>";
-  
+
   body += "<p>Missing Primary Contact in Salesforce:</p><ul>";
   for (var i in contents) {
     if (contents[i][idxMissingPrimaryContact] && contents[i][idxMissingPrimaryContact].length) {
@@ -33,7 +33,7 @@ function sendEmail() {
     }
   }
   body += "</ul>";
-  
+
   body += "<p>Primary Contact needs added to brigadeleads@:</p><ul>";
   for (var i in contents) {
     if (contents[i][idxAddBrigadeLeads] && contents[i][idxAddBrigadeLeads].length) {
@@ -41,9 +41,9 @@ function sendEmail() {
     }
   }
   body += "</ul>";
-  
+
   body += "<p>Other Log Output:</p><pre>" + Logger.getLog() + "</pre>";
-  
+
   MailApp.sendEmail({
     to: "tdooner@codeforamerica.org",
     subject: "Weekly Network Data Inconsistencies",

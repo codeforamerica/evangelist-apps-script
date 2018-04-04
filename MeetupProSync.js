@@ -33,7 +33,7 @@ function meetupRequest(url) {
   } else {
     url = url + '?key=' + MEETUP_API_KEY;
   }
-  
+
   var response;
   var retry = true, retries = 1;
   while (retry && retries > 0) {
@@ -57,7 +57,7 @@ function meetupRequest(url) {
   var links = {};
   var responseBytes = response.getContent().length;
   console.log("  Got response (Status: " + response.getResponseCode() + "; Size: " + responseBytes + "b; Ratelimit: " + headers['x-ratelimit-remaining'] + "/" + headers['x-ratelimit-limit'] + "; Reset in " + headers['x-ratelimit-reset'] + ")");
-  
+
   if (typeof headers['Link'] === 'string') {
     var parsedHeader = _meetupParseLinkHeader(headers['Link']);
     if (parsedHeader.rel) {
@@ -101,7 +101,7 @@ function _convertMeetupTime(datetime) {
 function meetupProSyncMembersIncremental() {
   meetupProSyncMembers(true);
 }
-      
+
 function meetupProSyncMembersAll() {
   meetupProSyncMembers(false);
 }
@@ -111,13 +111,13 @@ function meetupProSyncMembers(incremental) {
 
   var sheet = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID).getSheetByName(SHEET_NAMES.meetupMembers);
   var sheetHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  
+
   if (incremental) {
     var mostRecentId = parseInt(sheet.getRange(2, sheetHeaders.indexOf('Meetup ID') + 1, 1, 1).getValues()[0][0]);
   } else {
     var mostRecentId = -1; // fake value that no member ID will ever be equal too
   }
-  
+
   var currentPageRequest = meetupRequest('https://api.meetup.com/pro/brigade/members?page=200');
   var currentPageMembers = currentPageRequest.response;
   var currentMember = currentPageMembers.shift();
@@ -133,7 +133,7 @@ function meetupProSyncMembers(incremental) {
       "Join Time": currentMember.join_time,
       "Last Access Time": currentMember.last_access_time
     });
-    
+
     if (currentPageMembers.length === 0) {
       if (currentPageRequest.links.next) {
         if (currentPageRequest.recommendedSleepMs > 0) {
@@ -147,15 +147,15 @@ function meetupProSyncMembers(incremental) {
         break;
       }
     }
-    
+
     currentMember = currentPageMembers.shift();
   }
-  
+
   console.log("Done fetching Meetup members -- found " + membersToAppend.length + (incremental ? " to append" : " total"));
   if (membersToAppend.length === 0) {
     return; // nothing left to do here!
   }
-  
+
   if (incremental) {
     // prepend rows
     sheet.insertRowsBefore(2, membersToAppend.length);
@@ -163,7 +163,7 @@ function meetupProSyncMembers(incremental) {
     // replace all rows
     sheet.getRange(2, 1, sheet.getLastRow(), sheet.getLastColumn()).clear();
   }
-  
+
   var rowsToAppend = [];
   for (var i in membersToAppend) {
     var row = [];
