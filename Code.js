@@ -367,13 +367,13 @@ function createTriggers() {
     .timeBased().everyDays(1).atHour(19).create();              // 7pm
   ScriptApp.newTrigger("loadSalesforceBrigadeLeaders")
     .timeBased().everyDays(1).atHour(19).create();              // 7pm
+  ScriptApp.newTrigger("meetupProSyncMembersAll")
+    .timeBased().everyDays(1).atHour(19).create();              // 7pm
 
 
   ScriptApp.newTrigger("externalSheetSyncAll")
     .timeBased().everyDays(1).atHour(20).create();              // 8pm
 
-  ScriptApp.newTrigger("meetupProSyncMembersAll")
-    .timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();              // 7am Monday
   ScriptApp.newTrigger("sendEmail")
     .timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();              // 7am Monday
 }
