@@ -362,7 +362,10 @@ function createTriggers() {
     .timeBased().everyHours(1).create();                        // hourly
   ScriptApp.newTrigger("loadSalesforceData")
     .timeBased().everyHours(1).create();                        // hourly
+  ScriptApp.newTrigger("slackSignupForm")
+    .timeBased().everyHours(1).create();                        // hourly
 
+  // brigade dashboards / external sheet data loading:
   ScriptApp.newTrigger("loadSalesforceDonationData")
     .timeBased().everyDays(1).atHour(19).create();              // 7pm
   ScriptApp.newTrigger("loadSalesforceBrigadeLeaders")
@@ -371,6 +374,7 @@ function createTriggers() {
     .timeBased().everyDays(1).atHour(19).create();              // 7pm
 
 
+  // propagating changes to brigade dashboards / external sheets
   ScriptApp.newTrigger("externalSheetSyncAll")
     .timeBased().everyDays(1).atHour(20).create();              // 8pm
 
