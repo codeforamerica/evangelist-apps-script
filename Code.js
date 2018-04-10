@@ -158,17 +158,43 @@ function loadSalesforceData() {
 var SALESFORCE_DONATION_HEADERS = [
   'Date', 'Name', 'Email', 'Amount', 'Description', 'Brigade Designation'
 ];
+var SALESFORCE_DONATION_INCLUDE_BOTH_CONTACT_AND_ACCOUNT_TYPE_WHITELIST = [
+  'Corporation', 'Government', 'Foundation' // types of Account in salesforce
+];
 function loadSalesforceDonationData() {
   var salesforceDonations = salesforceListDonations();
   var donations = [];
 
   for (var i in salesforceDonations) {
     var donation = salesforceDonations[i];
+    /*
+     * Pull the contact and account names for the donation. If the Account Name is like "Tom Dooner Household" then
+     * we'll just show the donation as from "Tom Dooner" but if the Account Name is something else, it's likely a
+     * corporate donation and we should show it as "SomeCorp (Tom Dooner)"
+     */
+    var donationContactName = donation.Account.npe01__One2OneContact__r ? donation.Account.npe01__One2OneContact__r.Name : '';
+    var donationAccountName = donation.Account.Name;
+
+    if (SALESFORCE_DONATION_INCLUDE_BOTH_CONTACT_AND_ACCOUNT_TYPE_WHITELIST.indexOf(donation.Account.Type) !== -1) {
+      if (donationContactName.length) {
+        // corporate donation with an attached contact (i.e. through the donate form)
+        var donationName = donationAccountName + ' (' + donationContactName + ')';
+      } else {
+        // corporate donation without a contact (i.e. by wire or check)
+        var donationName = donationAccountName;
+      }
+    } else if (donationContactName.length) {
+      // individual donation with an attached contact (i.e. most donations since 2016)
+      var donationName = donationContactName;
+    } else {
+      // old individual donations (pre-2016) - fall back on account name
+      var donationName = donationAccountName;
+    }
 
     donations.push([
       donation.CloseDate,
       // name: (use contact name if possible, fall back on account name otherwise)
-      donation.Account.npe01__One2OneContact__r ? donation.Account.npe01__One2OneContact__r.Name : donation.Account.Name,
+      donationName,
       // email: (use contact email if possible, can't fall back because Accounts don't have email)
       donation.Account.npe01__One2OneContact__r ? donation.Account.npe01__One2OneContact__r.Email : '',
       donation.Amount,
