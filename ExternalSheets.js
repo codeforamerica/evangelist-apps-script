@@ -7,7 +7,8 @@ var EXTERNAL_SHEETS = [
   { sheetId: "1Jx39wrbME94f30K8cADoBUCvQvWPtWssZpV978skb_s", name: "Code for Philly", meetupUrlname: "Code-for-Philly" },
   { sheetId: "1UWcu6s1uNAJSYfj5NEdd7AKSQkTukVqwkLPRoiNs50Q", name: "Open Uptown", meetupUrlname: 'openuptown' },
   { sheetId: "1HQpWftpSvL2I7qwuO1q8fwkyo90L-sEH-_6eR9aPM4A", name: "Code for Orlando", meetupUrlname: 'Code-For-Orlando' },
-  { sheetId: "1T4ZGlAgbTMMR9wf6u7DHs4uhhk7-ldiuanmgiZByhhQ", name: "Open Toledo", meetupUrlname: 'Open-Toledo' }
+  { sheetId: "1T4ZGlAgbTMMR9wf6u7DHs4uhhk7-ldiuanmgiZByhhQ", name: "Open Toledo", meetupUrlname: 'Open-Toledo' },
+  { sheetId: "1KPF0iuwLVHiO-mj6Xj3hRpUVbp8cY5cMopdfnaElyXQ", name: "Code for Baltimore", meetupUrlname: 'Code-for-Baltimore' },
 ];
 
 /*
