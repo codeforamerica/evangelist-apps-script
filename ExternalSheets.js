@@ -59,7 +59,7 @@ function externalSheetAddInstructions() {
       ['- This is a pilot, send feedback to tdooner@codeforamerica.org'],
       ['- What other info would be helpful to have in here?'],
       ['- Feel free to share with brigade leadership at ' + brigade.name],
-      ['- This spreadsheet updates once a day'],
+      ['- This spreadsheet updates once a day around 8pm Pacific'],
       ["- Don't rename or modify the \"[AUTO]\" tabs (other than that, you can do whatever)"]
     ];
 
