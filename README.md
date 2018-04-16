@@ -26,6 +26,15 @@ The following features are works in progress:
 
 * **External Sheets**: Sync Meetup attendee data to external spreadsheets for purposes of sharing email addresses with brigades.
 
+## Naming Conventions
+The sheets in the Google docs relating to this repo are named according to this
+convention:
+
+* *`[AUTO]`* - Created by an automatic script from an external data source. Do not modify (or else the script will overwrite your changes).
+* *`[CALC]`* - An intermediate sheet used for internal calculations. Modify the formulas with caution.
+* *`[IMPORT]`* - A sheet that's copied for intermediate convenience. For example, importing a copy of the Brigade directory so that another sheet can use conditional validation of brigade names. Do not modify.
+* *`[EXPORT]`* - A sheet that's intended to be copied to external documents. Export sheets should include the URLs of any sheets that import them.
+
 ## Setup / Instructions:
 ```bash
 # 1. install node and yarn package manager
