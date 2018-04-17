@@ -96,7 +96,7 @@ To set up Salesforce sync, take the following steps:
    and click the "Authorize" link that appears in the spreadsheet.
 */
 var SALESFORCE_HEADERS = [
-  "Name", "Salesforce ID", "Active?", "Website URL", "Meetup Link", "Location",
+  "Name", "Salesforce ID", "Active?", "Website URL", "Meetup Link", "Meetup User ID", "Location",
   "Twitter", "Github URL", "Facebook Page URL", "Primary Contact", "Primary Contact Email",
   "Public Contact Email",
 ];
@@ -122,6 +122,7 @@ function loadSalesforceData() {
       isActiveBrigade,
       brigade.Website || brigade.Site_Link__c,
       brigade.MeetUp_Link__c,
+      brigade.MeetUp_User_ID__c,
       brigade.Brigade_Location__c,
       brigade.Organization_Twitter__c,
       brigade.Github_URL__c,

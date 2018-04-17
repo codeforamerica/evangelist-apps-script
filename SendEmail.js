@@ -8,6 +8,8 @@ function sendEmail() {
   var idxMissingBrigadeInfo = contents[0].indexOf("Missing from brigade-information");
   var idxMissingPrimaryContact = contents[0].indexOf("Missing Primary Contact");
   var idxAddBrigadeLeads = contents[0].indexOf("Add to brigadeleads@");
+  var idxMissingMeetupUserId = contents[0].indexOf("Missing Meetup User ID");
+
   contents.shift(); // remove header row
 
   var body = "<p>Missing from Salesforce:</p><ul>";
@@ -41,6 +43,13 @@ function sendEmail() {
     }
   }
   body += "</ul>";
+
+  body = "<p>Missing Meetup User ID in Salesforce:</p><ul>";
+  for (var i in contents) {
+    if (contents[i][idxMissingMeetupUserId] && contents[i][idxMissingMeetupUserId].length) {
+      body += "<li>" + contents[i][idxMissingMeetupUserId] + "</li>";
+    }
+  }
 
   body += "<p>Other Log Output:</p><pre>" + Logger.getLog() + "</pre>";
 
