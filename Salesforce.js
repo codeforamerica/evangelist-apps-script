@@ -156,7 +156,7 @@ function salesforceRequestRaw(method, requestUri, headers, payload) {
 }
 
 function salesforceListBrigades() {
-  var soql = "SELECT Id, Name, Brigade_Type__c, Brigade_Status__c, npe01__One2OneContact__r.Name, npe01__One2OneContact__r.Email, Brigade_Public_Email__c, Website, Site_Link__c, MeetUp_Link__c, Brigade_Location__c, Organization_Twitter__c, Github_URL__c, Facebook_Page_URL__c" +
+  var soql = "SELECT Id, Name, Brigade_Type__c, Brigade_Status__c, npe01__One2OneContact__r.Name, npe01__One2OneContact__r.Email, Brigade_Public_Email__c, Website, Site_Link__c, MeetUp_Link__c, MeetUp_User_ID__c, Brigade_Location__c, Organization_Twitter__c, Github_URL__c, Facebook_Page_URL__c" +
     " FROM Account WHERE Brigade_Type__c = 'Brigade' ORDER BY Name";
   var response = salesforceRequest('/query?q=' + encodeURIComponent(soql));
 
@@ -190,6 +190,23 @@ function salesforceListBrigadeLeaders() {
   }
 
   return response.records;
+}
+
+function salesforceListBrigadeAffiliations() {
+  var soql = "SELECT Id, npe5__Contact__c, npe5__Contact__r.Name, npe5__Contact__r.Meetup_User_ID__c, npe5__Organization__c, npe5__Organization__r.Name FROM npe5__Affiliation__c WHERE npe5__Organization__r.Type = 'Brigade' AND Source__c = 'Meetup'";
+  var response = salesforceRequest('/query?q=' + encodeURIComponent(soql));
+
+  if (response.error) {
+    console.error("ERROR fetching brigade affiliations: " + response.error);
+    Logger.log("ERROR: " + response.error);
+    return;
+  }
+
+  return response.records;
+}
+
+function salesforceCreateBatchJob() {
+
 }
 
 function salesforceAuthorize() {
