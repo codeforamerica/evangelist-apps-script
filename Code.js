@@ -7,7 +7,6 @@ var SHEET_NAMES = {
   salesforceDonations: 'AUTO:salesforce-donations',
   salesforceBrigadeLeaders: 'AUTO:salesforce-brigade-leaders',
   brigadeleads: 'AUTO:brigadeleads'
-
 }
 
 function loadAll() {
@@ -362,6 +361,7 @@ function createUI() {
     ui.createMenu('Update Data')
       .addItem('Update All', 'loadAll')
       .addSeparator()
+      .addItem('Auth Salesforce', 'salesforceAuthorize')
       .addItem('Update Salesforce Data', 'loadSalesforceData')
       .addItem('Update brigade-information', 'loadBrigadeInformation')
       .addItem('Update Meetup Data', 'loadMeetupData')
@@ -400,11 +400,11 @@ function createTriggers() {
   ScriptApp.newTrigger("meetupProSyncMembersAll")
     .timeBased().everyDays(1).atHour(19).create();              // 7pm
 
-
-  // propagating changes to brigade dashboards / external sheets
+  // brigade dashboards / external sheet data loading:
   ScriptApp.newTrigger("externalSheetSyncAll")
     .timeBased().everyDays(1).atHour(20).create();              // 8pm
 
+  // send the overview email
   ScriptApp.newTrigger("sendEmail")
     .timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7).create();              // 7am Monday
 }
