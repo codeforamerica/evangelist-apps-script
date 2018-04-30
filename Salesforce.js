@@ -21,6 +21,97 @@ function salesforceGetService() {
 }
 
 function salesforceRequest(apiEndpoint) {
+  var requestUri = "/services/data/v41.0" + apiEndpoint;
+
+  return salesforceRequestRaw('GET', requestUri);
+}
+
+function importMeetup() {
+  var contactsToCreateCSV = "Meetup_User_ID__c,FirstName,LastName,Email,MC_Brigade_Newsletter__c,Program_Interest_Brigade__c\n" +
+    "104952772000,Tom Test,Dooner,tomdooner+test@gmail.com,TRUE,TRUE\n"
+
+  var jobResults = salesforceBulkUpsert('Contact', 'Email', contactsToCreateCSV);
+}
+
+/*
+ * @param object {String} Name of object to upsert
+ * @param externalIdFieldName {String} The name of the field to use as an
+ *   external ID to find records that already exist. This can be Id, Email, or
+ *   any custom defined external IDs for that object.
+ * @param csv {String} The CSV of records to upsert.
+ */
+function salesforceBulkUpsert(object, externalIdFieldName, csv) {
+  var response,
+      jobId,
+      jobFinished = false,
+      jobResults = {};
+
+  console.log("Starting Salesforce Bulk Upsert (object = " + object + "; externalIdFieldName = " + externalIdFieldName + "; csv = " + csv.length + " bytes)");
+
+  // 1. create upsert batch
+  response = salesforceRequestRaw('POST', '/services/data/v41.0/jobs/ingest',
+    { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    JSON.stringify({
+      "object": object,
+      "operation" : "upsert",
+      "contentType" : "CSV",
+      "externalIdFieldName": externalIdFieldName
+    })
+  );
+
+  if (response.error) {
+    return { error: "Error creating Bulk API Job: " + response.error };
+  } else {
+    jobId = response.id;
+  }
+
+  // 2. Add a batch to that job
+  response = salesforceRequestRaw('PUT', '/services/data/v41.0/jobs/ingest/' + jobId + '/batches',
+    { 'Content-Type': 'text/csv', 'Accept': 'application/json' },
+    csv
+  );
+
+  if (response.error) {
+    return { error: "Got error when creating job batch: " + response.error };
+  }
+
+  // 3. Close the job so it starts!
+  response = salesforceRequestRaw('PATCH', '/services/data/v41.0/jobs/ingest/' + jobId,
+                                  { 'Content-Type': 'application/json' },
+                                  JSON.stringify({ 'state': 'UploadComplete' }));
+
+  // 4. Poll until complete
+  while (!jobFinished) {
+    Utilities.sleep(1000);
+    response = salesforceRequestRaw('GET', '/services/data/v41.0/jobs/ingest/' + jobId,
+                                    { 'Content-Type': 'application/json; charset=UTF-8', 'Accept': 'application/json' });
+    jobFinished = ['Aborted', 'JobComplete', 'Failed'].indexOf(response.state) !== -1;
+  }
+
+  jobResults['success'] = response.state === 'JobComplete';
+  jobResults['totalProcessingTime'] = response.totalProcessingTime;
+  jobResults['numberRecordsFailed'] = response.numberRecordsFailed;
+  jobResults['numberRecordsProcessed'] = response.numberRecordsProcessed;
+
+  // 5. Fetch successful results
+  response = salesforceRequestRaw('GET', '/services/data/v41.0/jobs/ingest/' + jobId + '/successfulResults/',
+                                  { 'Content-Type': 'application/json; charset=UTF-8', 'Accept': 'text/csv' })
+
+  jobResults['successfulResults'] = _csvRowsToJSON(Utilities.parseCsv(response));
+
+  // 6. Fetch failed results
+  response = salesforceRequestRaw('GET', '/services/data/v41.0/jobs/ingest/' + jobId + '/failedResults/',
+                                  { 'Content-Type': 'application/json; charset=UTF-8', 'Accept': 'text/csv' })
+  jobResults['failedResults'] = _csvRowsToJSON(Utilities.parseCsv(response));
+
+  console.log("Finished Salesforce Bulk Upsert. (Failed = " + jobResults.numberRecordsFailed + "; Took = " + jobResults.totalProcessingTime + ")");
+
+  return jobResults;
+}
+
+// Temporarily (?) provide a more raw API for making requests to support both "data" and "async" types of requests.
+function salesforceRequestRaw(method, requestUri, headers, payload) {
+  var headers = headers || {};
   var oauth = salesforceGetService();
   var token = oauth.getToken();
 
@@ -34,23 +125,29 @@ function salesforceRequest(apiEndpoint) {
       oauth.refresh();
     }
 
-    var queryUrl = token.instance_url + "/services/data/v41.0" + apiEndpoint;
     var options =  {
-      headers: {
+      method: method.toLowerCase(),
+      headers: Object.assign({
         Authorization: 'Bearer ' + oauth.getAccessToken()
-      }
+      }, headers),
+      payload: payload
     }
 
     try {
-      var response = UrlFetchApp.fetch(queryUrl,options);
+      var response = UrlFetchApp.fetch(token.instance_url + requestUri, options);
+      var responseHeaders = response.getHeaders();
     } catch (e) {
       return {
         error: e.message,
       }
     }
 
-    var queryResult = Utilities.jsonParse(response.getContentText());
-    return queryResult;
+    if (responseHeaders['Content-Type'] && responseHeaders['Content-Type'].indexOf('application/json') === 0) {
+      var queryResult = Utilities.jsonParse(response.getContentText());
+      return queryResult;
+    } else {
+      return response.getContentText();
+    }
   } else {
     return {
       "error": "No Salesforce OAuth. Run salesforceAuthorize function again."
