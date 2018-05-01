@@ -1,6 +1,7 @@
 /*
  * Code related to syndicating the results into Brigade-specific external sheets.
  *
+ * TODO: Use Meetup IDs here instead of urlnames.
  */
 var EXTERNAL_SHEETS = [
   { sheetId: "134_69wuLsB6kdOA3HctirpHRwwzxtSKun4xmyJqnFXM", name: "Open Oakland", meetupUrlname: "OpenOakland" },
@@ -9,6 +10,7 @@ var EXTERNAL_SHEETS = [
   { sheetId: "1HQpWftpSvL2I7qwuO1q8fwkyo90L-sEH-_6eR9aPM4A", name: "Code for Orlando", meetupUrlname: 'Code-For-Orlando' },
   { sheetId: "1T4ZGlAgbTMMR9wf6u7DHs4uhhk7-ldiuanmgiZByhhQ", name: "Open Toledo", meetupUrlname: 'Open-Toledo' },
   { sheetId: "1KPF0iuwLVHiO-mj6Xj3hRpUVbp8cY5cMopdfnaElyXQ", name: "Code for Baltimore", meetupUrlname: 'Code-for-Baltimore' },
+  { sheetId: "1zxyOEOTbkQuJxQSk3h3qAZgakN5XZyNGZT-3QPkzo9k", name: "Code for Jersey City", meetupUrlname: 'Code-For-Jersey-City' },
 ];
 
 /*
