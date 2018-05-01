@@ -1,5 +1,3 @@
-const _fullNameSplitter = require('full-name-splitter');
-
 /*
 * TODO:
 * - Populate it, and then use it in the import.
