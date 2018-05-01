@@ -11,6 +11,7 @@ var EXTERNAL_SHEETS = [
   { sheetId: "1T4ZGlAgbTMMR9wf6u7DHs4uhhk7-ldiuanmgiZByhhQ", name: "Open Toledo", meetupUrlname: 'Open-Toledo' },
   { sheetId: "1KPF0iuwLVHiO-mj6Xj3hRpUVbp8cY5cMopdfnaElyXQ", name: "Code for Baltimore", meetupUrlname: 'Code-for-Baltimore' },
   { sheetId: "1zxyOEOTbkQuJxQSk3h3qAZgakN5XZyNGZT-3QPkzo9k", name: "Code for Jersey City", meetupUrlname: 'Code-For-Jersey-City' },
+  { sheetId: "1mlWT-IHgRYMBq7TsO-g34VIfj7hZ60_2DyZQvZO0Shk", name: "Civic Data Alliance", meetupUrlname: 'Louisville-Civic-Data-Alliance' },
 ];
 
 /*
