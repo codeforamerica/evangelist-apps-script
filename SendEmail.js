@@ -44,7 +44,7 @@ function sendEmail() {
   }
   body += "</ul>";
 
-  body = "<p>Missing Meetup User ID in Salesforce:</p><ul>";
+  body += "<p>Missing Meetup User ID in Salesforce:</p><ul>";
   for (var i in contents) {
     if (contents[i][idxMissingMeetupUserId] && contents[i][idxMissingMeetupUserId].length) {
       body += "<li>" + contents[i][idxMissingMeetupUserId] + "</li>";
