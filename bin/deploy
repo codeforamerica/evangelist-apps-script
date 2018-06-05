@@ -37,6 +37,8 @@ clasp_login() {
   fi
 }
 
+yarn run build
+
 clasp_init
 clasp_login
 clasp deploy
