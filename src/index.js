@@ -1,3 +1,6 @@
+// load Object polyfills
+require('./Util.js');
+
 const {
   importInternalSalesforceToDirectory,
   importExternalSalesforceToDirectory,
