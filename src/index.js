@@ -26,12 +26,12 @@ const {
 } = require('./SendEmail.js');
 
 // register all public methods so they can be called by Google Apps Script
+global.externalSheetSyncAll = externalSheetSyncAll;
 global.importExternalSalesforceToDirectory = importExternalSalesforceToDirectory;
 global.importInternalSalesforceToDirectory = importInternalSalesforceToDirectory;
-global.meetupProSyncMembersIncremental = meetupProSyncMembersIncremental;
-global.meetupProSyncMembersAll = meetupProSyncMembersAll;
+global.loadSalesforceBrigadeLeaders = loadSalesforceBrigadeLeaders;
 global.loadSalesforceData = loadSalesforceData;
 global.loadSalesforceDonationData = loadSalesforceDonationData;
-global.loadSalesforceBrigadeLeaders = loadSalesforceBrigadeLeaders;
-global.externalSheetSyncAll = externalSheetSyncAll;
+global.meetupProSyncMembersAll = meetupProSyncMembersAll;
+global.meetupProSyncMembersIncremental = meetupProSyncMembersIncremental;
 global.sendEmail = sendEmail;
