@@ -7,6 +7,7 @@
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
     "babel-preset-google-apps-script": "^0.0.3",
+    "copy-webpack-plugin": "^4.5.1",
     "full-name-splitter": "^1.1.1",
     "gas-webpack-plugin": "^0.2.1",
     "webpack": "^4.6.0",
@@ -15,7 +16,7 @@
   "devDependencies": {
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.11.0"
+    "eslint-plugin-import": "^2.12.0"
   },
   "sideEffects": false,
   "scripts": {

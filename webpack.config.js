@@ -26,5 +26,6 @@ module.exports = {
   },
   plugins: [
     new GasPlugin(),
+    new CopyWebpackPlugin([{ from: 'appsscript.json', to: 'appsscript.json' }]),
   ],
 };
