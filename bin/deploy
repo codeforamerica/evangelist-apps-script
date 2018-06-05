@@ -37,8 +37,14 @@ clasp_login() {
   fi
 }
 
+if [ -z "${NODE_ENV:-""}" ]; then
+  echo "No NODE_ENV set."
+  exit 1
+fi
+
+rm -rf $repo_root/dist/*
 yarn run build
 
 clasp_init
 clasp_login
-clasp deploy
+clasp push
