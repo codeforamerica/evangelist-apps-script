@@ -417,6 +417,7 @@ function createTriggers() {
 }
 
 module.exports = {
+  SHEET_NAMES,
   loadSalesforceData,
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,

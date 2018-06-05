@@ -1,3 +1,7 @@
+const {
+  SHEET_NAMES,
+} = require('./Code.js');
+
 const DATABASE_DOC_ID = '1zglhAKDUNnvKindAhb6K_DJaLQ_myRYGKvE2DTYolAQ';
 const DATABASE_INTERNAL_DOC_ID = '12o5V69MMiYO6sls5V4FLN1_gtgquVlr3mzrncHvQZzI';
 const DATABASE_SHEET_NAME = 'Brigade Contact Info';
@@ -20,7 +24,7 @@ function importSalesforceToDirectory(isInternal) {
     'City',
     'State',
     'Primary Contact Name',
-    (isInternal && 'Primary Contact Email' || 'Public Contact Email'),
+    (isInternal ? 'Primary Contact Email' : 'Public Contact Email'),
     'Website',
     'Twitter',
     'Facebook Page URL',
@@ -238,3 +242,8 @@ function databaseTestBrigadeURLs() {
     }
   }
 }
+
+module.exports = {
+  importExternalSalesforceToDirectory,
+  importInternalSalesforceToDirectory,
+};
