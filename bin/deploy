@@ -11,7 +11,7 @@ clasp_init() {
     return 0
   elif [ -n "${GOOGLE_SCRIPT_ID:-""}" ]; then
     # create it from the environment variable
-    echo '{"scriptId":"'$GOOGLE_SCRIPT_ID'"}' > "$repo_root/.clasp.json"
+    echo '{"scriptId":"'$GOOGLE_SCRIPT_ID'","rootDir":"dist"}' > "$repo_root/.clasp.json"
     return 0
   else
     echo 'Error: Set $GOOGLE_SCRIPT_ID or run `clasp clone`.' >&2
@@ -36,6 +36,14 @@ clasp_login() {
     exit 1
   fi
 }
+
+if [ -z "${NODE_ENV:-""}" ]; then
+  echo "No NODE_ENV set."
+  exit 1
+fi
+
+rm -rf $repo_root/dist/*
+yarn run build
 
 clasp_init
 clasp_login
