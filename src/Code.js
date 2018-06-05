@@ -111,10 +111,10 @@ function loadSalesforceData() {
   for (const i in salesforceBrigades) {
     const brigade = salesforceBrigades[i];
 
-    const isActiveBrigade = brigade.Brigade_Type__c == 'Brigade' && (
-      brigade.Brigade_Status__c == 'Active' ||
-       (brigade.Brigade_Status__c == 'MOU in Process' && PARTNER_BRIGADES.indexOf(brigade.Name) !== -1) || // Only allow partner brigades in progress
-       brigade.Brigade_Status__c == 'Signed MOU' // TODO: Remove once the MOU signing process is over
+    const isActiveBrigade = brigade.Brigade_Type__c === 'Brigade' && (
+      brigade.Brigade_Status__c === 'Active' ||
+       (brigade.Brigade_Status__c === 'MOU in Process' && PARTNER_BRIGADES.indexOf(brigade.Name) !== -1) || // Only allow partner brigades in progress
+       brigade.Brigade_Status__c === 'Signed MOU' // TODO: Remove once the MOU signing process is over
     );
 
     brigades.push([
