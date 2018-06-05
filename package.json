@@ -21,6 +21,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "test": "webpack"
   }
 }
