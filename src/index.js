@@ -2,6 +2,10 @@
 require('./Util.js');
 
 const {
+  discourseSyncBrigadeList,
+} = require('./Discourse.js');
+
+const {
   importInternalSalesforceToDirectory,
   importExternalSalesforceToDirectory,
 } = require('./BrigadeDatabase.js');
@@ -26,6 +30,7 @@ const {
 } = require('./SendEmail.js');
 
 // register all public methods so they can be called by Google Apps Script
+global.discourseSyncBrigadeList = discourseSyncBrigadeList;
 global.externalSheetSyncAll = externalSheetSyncAll;
 global.importExternalSalesforceToDirectory = importExternalSalesforceToDirectory;
 global.importInternalSalesforceToDirectory = importInternalSalesforceToDirectory;
