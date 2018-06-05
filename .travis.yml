@@ -1,1 +1,4 @@
 language: node_js
+node_js:
+  # match this with .node-version:
+  - "8.9.4"
