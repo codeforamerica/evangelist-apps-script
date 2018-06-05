@@ -1,0 +1,42 @@
+#!/bin/bash
+# Deploys this repo either locally or on travis.
+set -euo pipefail
+repo_root=$(cd $(dirname $0)/..; pwd)
+
+clasp_init() {
+  filename="$repo_root/.clasp.json"
+
+  if [ -f "$filename" ]; then
+    # it exists! nothing to do.
+    return 0
+  elif [ -n "${GOOGLE_SCRIPT_ID:-""}" ]; then
+    # create it from the environment variable
+    echo '{"scriptId":"'$GOOGLE_SCRIPT_ID'"}' > "$repo_root/.clasp.json"
+    return 0
+  else
+    echo 'Error: Set $GOOGLE_SCRIPT_ID or run `clasp clone`.' >&2
+    exit 1
+  fi
+}
+
+clasp_login() {
+  filename="$HOME/.clasprc.json"
+
+  if [ -f "$filename" ]; then
+    # it exists! nothing to do.
+    return 0
+  elif [ -n "${GOOGLE_ACCESS_TOKEN:-""}" -a -n "${GOOGLE_REFRESH_TOKEN:-""}" ]; then
+    echo '{
+      "access_token": "'$GOOGLE_ACCESS_TOKEN'",
+      "refresh_token": "'$GOOGLE_REFRESH_TOKEN'"
+    }' > $filename
+    return 0
+  else
+    echo 'Error: Set $GOOGLE_ACCESS_TOKEN and $GOOGLE_REFRESH_TOKEN or run `clasp login`.'
+    exit 1
+  fi
+}
+
+clasp_init
+clasp_login
+clasp deploy

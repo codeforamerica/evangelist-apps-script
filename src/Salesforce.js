@@ -60,7 +60,9 @@ function salesforceBulkUpsert(object, externalIdFieldName, csv) {
   );
 
   if (response.error) {
-    return { error: "Error creating Bulk API Job: " + response.error };
+    return {
+      error: "Error creating Bulk API Job: " + response.error
+    };
   } else {
     jobId = response.id;
   }
@@ -103,7 +105,6 @@ function salesforceBulkUpsert(object, externalIdFieldName, csv) {
   response = salesforceRequestRaw('GET', '/services/data/v41.0/jobs/ingest/' + jobId + '/failedResults/',
                                   { 'Content-Type': 'application/json; charset=UTF-8', 'Accept': 'text/csv' })
   jobResults['failedResults'] = _csvRowsToJSON(Utilities.parseCsv(response));
-
   console.log("Finished Salesforce Bulk Upsert. (Failed = " + jobResults.numberRecordsFailed + "; Took = " + jobResults.totalProcessingTime + ")");
 
   return jobResults;
