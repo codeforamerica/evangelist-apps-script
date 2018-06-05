@@ -1,6 +1,10 @@
-const GasPlugin = require('gas-webpack-plugin');
 const path = require('path');
+
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const GasPlugin = require('gas-webpack-plugin');
+
 const process = require('process');
+
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',

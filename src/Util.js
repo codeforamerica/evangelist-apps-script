@@ -2,22 +2,23 @@
  * Object.assign polyfill from:
  *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
  */
-if (typeof Object.assign != 'function') {
+if (typeof Object.assign !== 'function') {
   // Must be writable: true, enumerable: false, configurable: true
-  Object.defineProperty(Object, "assign", {
+  Object.defineProperty(Object, 'assign', {
     value: function assign(target, varArgs) { // .length of function is 2
-      'use strict';
+'use strict';
+
       if (target == null) { // TypeError if undefined or null
         throw new TypeError('Cannot convert undefined or null to object');
       }
 
-      var to = Object(target);
+      const to = Object(target);
 
-      for (var index = 1; index < arguments.length; index++) {
-        var nextSource = arguments[index];
+      for (let index = 1; index < arguments.length; index++) {
+        const nextSource = arguments[index];
 
         if (nextSource != null) { // Skip over if undefined or null
-          for (var nextKey in nextSource) {
+          for (const nextKey in nextSource) {
             // Avoid bugs when hasOwnProperty is shadowed
             if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
               to[nextKey] = nextSource[nextKey];
@@ -28,7 +29,7 @@ if (typeof Object.assign != 'function') {
       return to;
     },
     writable: true,
-    configurable: true
+    configurable: true,
   });
 }
 
@@ -40,13 +41,13 @@ if (typeof Object.assign != 'function') {
  * Perfect to receive the output of Utilities.parseCsv()
  */
 function _csvRowsToJSON(rows) {
-  var headers = rows.shift();
+  const headers = rows.shift();
 
-  var objectsToReturn = [];
-  for (var i in rows) {
-    var row = rows[i];
-    var obj = {};
-    for (var j in headers) {
+  const objectsToReturn = [];
+  for (const i in rows) {
+    const row = rows[i];
+    const obj = {};
+    for (const j in headers) {
       obj[headers[j]] = row[j];
     }
     objectsToReturn.push(obj);
