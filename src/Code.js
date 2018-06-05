@@ -1,3 +1,7 @@
+const {
+  salesforceListBrigades,
+} = require('./Salesforce.js');
+
 const SHEET_NAMES = {
   todo: 'TODO List',
   brigadeInfo: 'AUTO:brigade-information',

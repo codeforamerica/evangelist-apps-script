@@ -245,3 +245,7 @@ function salesforceAuthCallback(request) {
   }
   return HtmlService.createHtmlOutput('Denied. You can close this tab');
 }
+
+module.exports = {
+  salesforceListBrigades,
+};
