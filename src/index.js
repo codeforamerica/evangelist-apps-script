@@ -15,7 +15,7 @@ const {
   loadSalesforceData,
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,
-} = require('./Salesforce.js');
+} = require('./Code.js');
 
 const {
   externalSheetSyncAll,

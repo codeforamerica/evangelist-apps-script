@@ -411,3 +411,9 @@ function createTriggers() {
     .timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7)
     .create(); // 7am Monday
 }
+
+module.exports = {
+  loadSalesforceData,
+  loadSalesforceDonationData,
+  loadSalesforceBrigadeLeaders,
+};
