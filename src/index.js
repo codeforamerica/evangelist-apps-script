@@ -29,6 +29,10 @@ const {
   sendEmail,
 } = require('./SendEmail.js');
 
+const {
+  slackSignupForm,
+} = require('./SlackSignupForm.js');
+
 // register all public methods so they can be called by Google Apps Script
 global.discourseSyncBrigadeList = discourseSyncBrigadeList;
 global.externalSheetSyncAll = externalSheetSyncAll;
@@ -40,3 +44,4 @@ global.loadSalesforceDonationData = loadSalesforceDonationData;
 global.meetupProSyncMembersAll = meetupProSyncMembersAll;
 global.meetupProSyncMembersIncremental = meetupProSyncMembersIncremental;
 global.sendEmail = sendEmail;
+global.slackSignupForm = slackSignupForm;
