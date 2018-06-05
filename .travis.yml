@@ -2,3 +2,11 @@ language: node_js
 node_js:
   # match this with .node-version:
   - "8.9.4"
+jobs:
+  include:
+    - stage: test
+      script: yarn run test
+    - stage: deploy
+      env: NODE_ENV=production
+      script: bin/deploy
+      if: type = push
