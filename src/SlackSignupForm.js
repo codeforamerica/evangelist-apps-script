@@ -1,34 +1,50 @@
-const {
-  SHEET_NAMES,
-} = require('./Code.js');
+/*
+ * SlackSignupForm
+ *
+ * Handles the logic of updating the Slack Signup form with the updated brigade
+ * list.
+ */
+class SlackSignupForm {
+  constructor(brigadeListId, brigadeListSheetName, formId) {
+    this.brigadeListId = brigadeListId;
+    this.brigadeListSheetName = brigadeListSheetName;
+    this.form = FormApp.openById(formId);
+  }
 
-const SLACK_SIGNUP_FORM_ID = '17BXzqiA_cYAfpDSILHDnlavQOXV8kHgsYWp4f8ayUt4';
-
-module.exports = {
-  slackSignupForm() {
-    const form = FormApp.openById(SLACK_SIGNUP_FORM_ID);
-
-    let brigadeListItem = form
-      .getItems(FormApp.ItemType.LIST)
-      .filter(i => i.getTitle().indexOf('which Brigade do you attend?') !== -1);
-
-    if (brigadeListItem.length !== 1) {
-      throw new Error('ERROR: Could not find brigade Slack question in signup form');
-    }
-
-    brigadeListItem = brigadeListItem[0].asListItem();
-
+  fetchBrigadeList() {
     // get list of brigades from salesforce sheet
-    const salesforceContents = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce)
-      .getDataRange().getValues();
+    const salesforceContents = SpreadsheetApp
+      .openById(this.brigadeListId)
+      .getSheetByName(this.brigadeListSheetName)
+      .getDataRange()
+      .getValues();
     const salesforceHeaders = salesforceContents.shift();
     const headerActiveIndex = salesforceHeaders.indexOf('Active?');
     const headerNameIndex = salesforceHeaders.indexOf('Name');
 
-    const brigadeListChoices = salesforceContents
+    return salesforceContents
       .filter(row => row[headerActiveIndex])
-      .map(row => brigadeListItem.createChoice(row[headerNameIndex]));
+      .map(row => row[headerNameIndex]);
+  }
+
+  fetchFormQuestion() {
+    return this.form
+      .getItems(FormApp.ItemType.LIST)
+      .filter(i => i.getTitle().indexOf('which Brigade do you attend?') !== -1);
+  }
+
+  updateField() {
+    let brigadeListItem = this.fetchFormQuestion();
+    if (brigadeListItem.length !== 1) {
+      throw new Error('ERROR: Could not find brigade Slack question in signup form');
+    }
+    brigadeListItem = brigadeListItem[0].asListItem();
+
+    const brigadeListChoices =
+      this.fetchBrigadeList().map(b => brigadeListItem.createChoice(b));
 
     brigadeListItem.setChoices(brigadeListChoices);
-  },
-};
+  }
+}
+
+module.exports = SlackSignupForm;
