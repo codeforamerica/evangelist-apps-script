@@ -47,4 +47,4 @@ yarn run build
 
 clasp_init
 clasp_login
-clasp deploy
+clasp push
