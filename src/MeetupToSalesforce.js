@@ -1,3 +1,4 @@
+const { salesforceListBrigadeAffiliations } = require('./Salesforce.js');
 /*
 * TODO:
 * - Populate it, and then use it in the import.

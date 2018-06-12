@@ -258,4 +258,5 @@ module.exports = {
   salesforceListBrigades,
   salesforceListDonations,
   salesforceListBrigadeLeaders,
+  salesforceListBrigadeAffiliations,
 };
