@@ -248,4 +248,5 @@ function salesforceAuthCallback(request) {
 
 module.exports = {
   salesforceListBrigades,
+  salesforceListDonations,
 };

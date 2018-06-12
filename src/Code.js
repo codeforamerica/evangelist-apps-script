@@ -1,5 +1,6 @@
 const {
   salesforceListBrigades,
+  salesforceListDonations,
 } = require('./Salesforce.js');
 
 const SHEET_NAMES = {
