@@ -175,3 +175,8 @@ function meetupProSyncMembers(incremental) {
   sheet.getRange(2, 1, rowsToAppend.length, sheet.getLastColumn())
     .setValues(rowsToAppend);
 }
+
+module.exports = {
+  meetupProSyncMembersAll,
+  meetupProSyncMembersIncremental,
+};
