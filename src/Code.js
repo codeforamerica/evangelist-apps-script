@@ -237,7 +237,7 @@ function loadSalesforceDonationData() {
  *
  * This is essentially copied from the other salesforce data fetching methods.
  */
-SALESFORCE_BRIGADE_LEADERS_HEADERS = [
+const SALESFORCE_BRIGADE_LEADERS_HEADERS = [
   'Name', 'Email', 'Brigade Name', 'Affiliation Creation Date',
 ];
 function loadSalesforceBrigadeLeaders() {
@@ -261,7 +261,7 @@ function loadSalesforceBrigadeLeaders() {
   //   (this happens for example when we hit salesforce API limit)
   if (!leaders.length) {
     Logger.log('ERROR: No brigade leaders returned from salesforce. Bailing.');
-    return;
+    return null;
   }
 
   sheet
@@ -420,6 +420,7 @@ function createTriggers() {
 
 module.exports = {
   SHEET_NAMES,
+  loadAll,
   loadSalesforceData,
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,
