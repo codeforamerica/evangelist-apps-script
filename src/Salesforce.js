@@ -224,10 +224,6 @@ function salesforceListBrigadeAffiliations() {
   return response.records;
 }
 
-function salesforceCreateBatchJob() {
-
-}
-
 function salesforceAuthorize() {
   const oauth = salesforceGetService();
   if (oauth.hasAccess()) {
