@@ -226,6 +226,7 @@ function salesforceListBrigadeAffiliations() {
   return response.records;
 }
 
+// callback from a menu in the spreadsheet
 function salesforceAuthorize() {
   const oauth = salesforceGetService();
   if (oauth.hasAccess()) {
@@ -239,11 +240,14 @@ function salesforceAuthorize() {
     SpreadsheetApp.getUi().showSidebar(page);
   }
 }
+global.salesforceAuthorize = salesforceAuthorize;
 
+// handy function to test salesforce in the IDE:
 function salesforceUnauthorize() {
   const oauth = salesforceGetService();
   oauth.reset();
 }
+global.salesforceUnauthorize = salesforceUnauthorize;
 
 function salesforceAuthCallback(request) {
   const service = salesforceGetService();
@@ -253,6 +257,7 @@ function salesforceAuthCallback(request) {
   }
   return HtmlService.createHtmlOutput('Denied. You can close this tab');
 }
+global.salesforceAuthCallback = salesforceAuthCallback;
 
 module.exports = {
   salesforceListBrigades,
