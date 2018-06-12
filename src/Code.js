@@ -15,31 +15,20 @@ const SHEET_NAMES = {
   brigadeleads: 'AUTO:brigadeleads',
 };
 
-function loadAll() {
-  createUI();
-  loadBrigadeInformation();
-  loadMeetupData();
-  const brigades = loadSalesforceData();
-  loadGroupMembers(brigades);
-  slackSignupForm();
-}
-
 function loadBrigadeInformation() {
   const infoResponse = UrlFetchApp.fetch('https://raw.githubusercontent.com/codeforamerica/brigade-information/master/organizations.json');
   const info = JSON.parse(infoResponse);
   const brigades = [];
 
-  for (const i in info) {
-    const brigade = info[i];
-
+  info.forEach((brigade) => {
     // filter to only the official CfA Brigades
     if (brigade.tags.indexOf('Code for America') === -1 ||
         brigade.tags.indexOf('Brigade') === -1) {
-      continue;
+      return;
     }
 
     brigades.push([brigade.name]);
-  }
+  });
 
   const sheet = SpreadsheetApp.getActive()
     .getSheetByName(SHEET_NAMES.brigadeInfo);
@@ -61,10 +50,10 @@ function loadMeetupData() {
     const eventResponse = JSON.parse(UrlFetchApp.fetch(pageUrl));
     const events = eventResponse.objects;
 
-    for (const i in events) {
-      const event = events[i];
+    events.forEach((event) => {
       const start = event.start_time;
-      const startParsed = Date.parse(`${start.substring(0, 10)}T${start.substring(11, 19)}${start.substring(20, 25)}`) / 1000 / 86400.0 + SEVENTY_YEARS_IN_DAYS;
+      const startParsed = (Date.parse(`${start.substring(0, 10)}T${start.substring(11, 19)}${start.substring(20, 25)}`)
+        / 1000 / 86400.0) + SEVENTY_YEARS_IN_DAYS;
 
       eventsToAppend.push([
         event.organization_name,
@@ -73,7 +62,7 @@ function loadMeetupData() {
         startParsed,
         event.rsvps,
       ]);
-    }
+    });
 
     pageUrl = eventResponse.pages.next;
   }
@@ -110,9 +99,7 @@ function loadSalesforceData() {
   const salesforceBrigades = salesforceListBrigades();
   const brigades = [];
 
-  for (const i in salesforceBrigades) {
-    const brigade = salesforceBrigades[i];
-
+  salesforceBrigades.forEach((brigade) => {
     const isActiveBrigade = brigade.Brigade_Type__c === 'Brigade' && (
       brigade.Brigade_Status__c === 'Active' ||
        (brigade.Brigade_Status__c === 'MOU in Process' && PARTNER_BRIGADES.indexOf(brigade.Name) !== -1) || // Only allow partner brigades in progress
@@ -134,7 +121,7 @@ function loadSalesforceData() {
       brigade.npe01__One2OneContact__r && brigade.npe01__One2OneContact__r.Email,
       brigade.Brigade_Public_Email__c,
     ]);
-  }
+  });
 
   const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
 
@@ -142,7 +129,8 @@ function loadSalesforceData() {
   //   (this happens for example when we hit salesforce API limit)
   if (!brigades.length) {
     Logger.log('ERROR: No brigades returned from salesforce. Bailing.');
-    const existingBrigades = sheet.getRange(2, 1, sheet.getLastRow(), SALESFORCE_HEADERS.length).getValues();
+    const existingBrigades =
+      sheet.getRange(2, 1, sheet.getLastRow(), SALESFORCE_HEADERS.length).getValues();
     return existingBrigades;
   }
 
@@ -169,30 +157,32 @@ function loadSalesforceDonationData() {
   const salesforceDonations = salesforceListDonations();
   const donations = [];
 
-  for (const i in salesforceDonations) {
-    const donation = salesforceDonations[i];
+  salesforceDonations.forEach((donation) => {
     /*
-     * Pull the contact and account names for the donation. If the Account Name is like "Tom Dooner Household" then
-     * we'll just show the donation as from "Tom Dooner" but if the Account Name is something else, it's likely a
+     * Pull the contact and account names for the donation. If the Account Name
+     * is like "Tom Dooner Household" then we'll just show the donation as from
+     * "Tom Dooner" but if the Account Name is something else, it's likely a
      * corporate donation and we should show it as "SomeCorp (Tom Dooner)"
      */
     const donationContactName = donation.Account.npe01__One2OneContact__r ? donation.Account.npe01__One2OneContact__r.Name : '';
     const donationAccountName = donation.Account.Name;
+    let donationName;
 
+    // eslint-disable-next-line
     if (SALESFORCE_DONATION_INCLUDE_BOTH_CONTACT_AND_ACCOUNT_TYPE_WHITELIST.indexOf(donation.Account.Type) !== -1) {
       if (donationContactName.length) {
         // corporate donation with an attached contact (i.e. through the donate form)
-        var donationName = `${donationAccountName} (${donationContactName})`;
+        donationName = `${donationAccountName} (${donationContactName})`;
       } else {
         // corporate donation without a contact (i.e. by wire or check)
-        var donationName = donationAccountName;
+        donationName = donationAccountName;
       }
     } else if (donationContactName.length) {
       // individual donation with an attached contact (i.e. most donations since 2016)
-      var donationName = donationContactName;
+      donationName = donationContactName;
     } else {
       // old individual donations (pre-2016) - fall back on account name
-      var donationName = donationAccountName;
+      donationName = donationAccountName;
     }
 
     donations.push([
@@ -205,7 +195,7 @@ function loadSalesforceDonationData() {
       donation.Description,
       donation.Brigade_Designation_lookup__r.Name,
     ]);
-  }
+  });
 
   const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforceDonations);
 
@@ -213,7 +203,8 @@ function loadSalesforceDonationData() {
   //   (this happens for example when we hit salesforce API limit)
   if (!donations.length) {
     Logger.log('ERROR: No donations returned from salesforce. Bailing.');
-    const existingDonations = sheet.getRange(2, 1, sheet.getLastRow(), SALESFORCE_DONATION_HEADERS.length).getValues();
+    const existingDonations =
+      sheet.getRange(2, 1, sheet.getLastRow(), SALESFORCE_DONATION_HEADERS.length).getValues();
     return existingDonations;
   }
 
@@ -242,18 +233,12 @@ const SALESFORCE_BRIGADE_LEADERS_HEADERS = [
 ];
 function loadSalesforceBrigadeLeaders() {
   const salesforceLeaders = salesforceListBrigadeLeaders();
-  const leaders = [];
-
-  for (const i in salesforceLeaders) {
-    const leader = salesforceLeaders[i];
-
-    leaders.push([
-      leader.npe5__Contact__r.Name,
-      leader.npe5__Contact__r.Email,
-      leader.npe5__Organization__r.Name,
-      leader.CreatedDate,
-    ]);
-  }
+  const leaders = salesforceLeaders.map(leader => [
+    leader.npe5__Contact__r.Name,
+    leader.npe5__Contact__r.Email,
+    leader.npe5__Organization__r.Name,
+    leader.CreatedDate,
+  ]);
 
   const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforceBrigadeLeaders);
 
@@ -296,39 +281,45 @@ const MANUAL_OVERRIDE_ADD_MEMBER = [
   'captains@codefortulsa.org',
 ];
 function loadGroupMembers(brigadeResults) {
-  brigadeResults = brigadeResults || loadSalesforceData();
+  const brigades = brigadeResults || loadSalesforceData();
   const group = GroupsApp.getGroupByEmail('brigadeleads@codeforamerica.org');
 
   // First, populate a list of emails to check
   const activeColumn = SALESFORCE_HEADERS.indexOf('Active?');
   const primaryContactEmail = SALESFORCE_HEADERS.indexOf('Primary Contact Email');
   const emails = [];
-  for (var i in brigadeResults) {
-    if (brigadeResults[i] && brigadeResults[i][activeColumn]) { // remove missing primary contact & inactive
-      emails.push(brigadeResults[i][primaryContactEmail]);
+  brigades.forEach((brigade) => {
+    if (brigade && brigade[activeColumn]) { // remove missing primary contact & inactive
+      emails.push(brigade[primaryContactEmail]);
     }
-  }
+  });
 
   // ... add in any emails for co-captains that aren't the primary contact:
-  const salesforceBrigadeLeaders = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforceBrigadeLeaders).getDataRange().getValues();
-  const salesforceBrigadeLeadersHeaders = salesforceBrigadeLeaders.shift();
-  for (var i in salesforceBrigadeLeaders) {
-    const brigadeLeaderEmail = salesforceBrigadeLeaders[i][salesforceBrigadeLeadersHeaders.indexOf('Email')];
-    if (brigadeLeaderEmail && brigadeLeaderEmail.length && emails.indexOf(brigadeLeaderEmail) === -1) {
+  const [
+    salesforceBrigadeLeadersHeaders,
+    ...salesforceBrigadeLeaders
+  ] = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforceBrigadeLeaders)
+    .getDataRange().getValues();
+
+  salesforceBrigadeLeaders.forEach((brigadeLeader) => {
+    const brigadeLeaderEmail = brigadeLeader[salesforceBrigadeLeadersHeaders.indexOf('Email')];
+
+    if (brigadeLeaderEmail && brigadeLeaderEmail.length &&
+      emails.indexOf(brigadeLeaderEmail) === -1) {
       emails.push(brigadeLeaderEmail);
     }
-  }
+  });
 
   // Now, loop over the emails and check each one to see if it's subscribed
   const usersToAppend = [];
-  for (var i in emails) {
-    var groupHasUser;
+  emails.forEach((email) => {
+    let groupHasUser;
 
-    if (MANUAL_OVERRIDE_ADD_MEMBER.indexOf(emails[i]) === -1) {
+    if (MANUAL_OVERRIDE_ADD_MEMBER.indexOf(email) === -1) {
       try {
-        groupHasUser = group.hasUser(emails[i]);
+        groupHasUser = group.hasUser(email);
       } catch (e) {
-        Logger.log(`ERROR: Could not check group membership for ${emails[i]}: ${e.message}`);
+        Logger.log(`ERROR: Could not check group membership for ${email}: ${e.message}`);
         Logger.log('  ...assuming that email is a member of the group.');
         groupHasUser = true;
       }
@@ -337,11 +328,11 @@ function loadGroupMembers(brigadeResults) {
     }
 
     usersToAppend.push([
-      emails[i],
+      email,
       groupHasUser,
     ]);
     Utilities.sleep(250);
-  }
+  });
 
   const SHEET_HEADERS = ['Primary Contact Email', 'Is Subscribed To brigadeleads@'];
   const sheet = SpreadsheetApp.getActive()
@@ -374,15 +365,15 @@ function createUI() {
       .addItem('Send Email Update', 'sendEmail')
       .addItem('Pull Contact Database from Salesforce', 'importSalesforceToDirectory')
       .addToUi();
-  } catch (e) {}
+  } catch (e) {
+    // swallow it
+  }
 }
 
 function createTriggers() {
   // remove all existing triggers:
   const existingTriggers = ScriptApp.getProjectTriggers();
-  for (const i in existingTriggers) {
-    ScriptApp.deleteTrigger(existingTriggers[i]);
-  }
+  existingTriggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
 
   // create new triggers:
   ScriptApp.newTrigger('importExternalSalesforceToDirectory')
@@ -418,8 +409,17 @@ function createTriggers() {
     .create(); // 7am Monday
 }
 
+function loadAll() {
+  createUI();
+  loadBrigadeInformation();
+  loadMeetupData();
+  const brigades = loadSalesforceData();
+  loadGroupMembers(brigades);
+}
+
 module.exports = {
   SHEET_NAMES,
+  createTriggers,
   loadAll,
   loadSalesforceData,
   loadSalesforceDonationData,
