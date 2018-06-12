@@ -35,7 +35,7 @@ function salesforceGetService() {
  *   headers['Content-Type'] to match the content of the payload.
  */
 function salesforceRequestRaw(method, requestUri, headers, payload) {
-  var headers = headers || {};
+  const requestHeaders = headers || {};
   const oauth = salesforceGetService();
   const token = oauth.getToken();
 
@@ -57,7 +57,7 @@ function salesforceRequestRaw(method, requestUri, headers, payload) {
       method: method.toLowerCase(),
       headers: Object.assign({
         Authorization: `Bearer ${oauth.getAccessToken()}`,
-      }, headers),
+      }, requestHeaders),
       payload,
     };
 
