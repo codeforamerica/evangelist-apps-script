@@ -55,3 +55,7 @@ function _csvRowsToJSON(rows) {
 
   return objectsToReturn;
 }
+
+module.exports = {
+  csvRowsToJSON: _csvRowsToJSON,
+};

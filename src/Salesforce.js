@@ -1,10 +1,14 @@
+/* global OAuth2 */
+
+const { csvRowsToJSON } = require('./Util.js');
+
 function salesforceGetService() {
-  const sfConsumerKey = ScriptProperties.getProperty('SALESFORCE_CONSUMER_KEY');
-  const sfConsumerSecret = ScriptProperties.getProperty('SALESFORCE_CONSUMER_SECRET');
+  const sfConsumerKey = PropertiesService.getScriptProperties().getProperty('SALESFORCE_CONSUMER_KEY');
+  const sfConsumerSecret = PropertiesService.getScriptProperties().getProperty('SALESFORCE_CONSUMER_SECRET');
 
   if (!sfConsumerKey || !sfConsumerSecret) {
     Logger.log('Set SALESFORCE_CONSUMER_KEY and SALESFORCE_CONSUMER_SECRET in Script Properties');
-    return;
+    return null;
   }
 
   return OAuth2.createService('salesforce')
@@ -41,10 +45,9 @@ function importMeetup() {
  * @param csv {String} The CSV of records to upsert.
  */
 function salesforceBulkUpsert(object, externalIdFieldName, csv) {
-  let response,
-    jobId,
-    jobFinished = false,
-    jobResults = {};
+  let response;
+  let jobFinished = false;
+  const jobResults = {};
 
   console.log(`Starting Salesforce Bulk Upsert (object = ${object}; externalIdFieldName = ${externalIdFieldName}; csv = ${csv.length} bytes)`);
 
@@ -65,8 +68,8 @@ function salesforceBulkUpsert(object, externalIdFieldName, csv) {
       error: `Error creating Bulk API Job: ${response.error}`,
     };
   }
-  jobId = response.id;
 
+  const jobId = response.id;
 
   // 2. Add a batch to that job
   response = salesforceRequestRaw(
@@ -107,14 +110,14 @@ function salesforceBulkUpsert(object, externalIdFieldName, csv) {
     { 'Content-Type': 'application/json; charset=UTF-8', Accept: 'text/csv' },
   );
 
-  jobResults.successfulResults = _csvRowsToJSON(Utilities.parseCsv(response));
+  jobResults.successfulResults = csvRowsToJSON(Utilities.parseCsv(response));
 
   // 6. Fetch failed results
   response = salesforceRequestRaw(
     'GET', `/services/data/v41.0/jobs/ingest/${jobId}/failedResults/`,
     { 'Content-Type': 'application/json; charset=UTF-8', Accept: 'text/csv' },
   );
-  jobResults.failedResults = _csvRowsToJSON(Utilities.parseCsv(response));
+  jobResults.failedResults = csvRowsToJSON(Utilities.parseCsv(response));
   console.log(`Finished Salesforce Bulk Upsert. (Failed = ${jobResults.numberRecordsFailed}; Took = ${jobResults.totalProcessingTime})`);
 
   return jobResults;
@@ -132,7 +135,11 @@ function salesforceRequestRaw(method, requestUri, headers, payload) {
     const SALESFORCE_TOKEN_TIMEOUT_SECONDS = 2 * 60 * 60; // tokens are valid for 2 hours
     const SALESFORCE_TOKEN_TIMEOUT_BUFFER = 60; // seconds
     const now = Math.floor(new Date().getTime() / 1000);
-    if (token.granted_time + SALESFORCE_TOKEN_TIMEOUT_SECONDS - now < SALESFORCE_TOKEN_TIMEOUT_BUFFER) {
+    const isTokenExpired =
+      (token.granted_time + SALESFORCE_TOKEN_TIMEOUT_SECONDS) - now <
+        SALESFORCE_TOKEN_TIMEOUT_BUFFER;
+
+    if (isTokenExpired) {
       oauth.refresh();
     }
 
@@ -144,9 +151,12 @@ function salesforceRequestRaw(method, requestUri, headers, payload) {
       payload,
     };
 
+    let response;
+    let responseHeaders = {};
+
     try {
-      var response = UrlFetchApp.fetch(token.instance_url + requestUri, options);
-      var responseHeaders = response.getHeaders();
+      response = UrlFetchApp.fetch(token.instance_url + requestUri, options);
+      responseHeaders = response.getHeaders();
     } catch (e) {
       return {
         error: e.message,
@@ -171,7 +181,7 @@ function salesforceListBrigades() {
 
   if (response.error) {
     Logger.log(`ERROR: ${response.error}`);
-    return;
+    return null;
   }
 
   return response.records;
@@ -183,7 +193,7 @@ function salesforceListDonations() {
 
   if (response.error) {
     Logger.log(`ERROR: ${response.error}`);
-    return;
+    return null;
   }
 
   return response.records;
@@ -195,7 +205,7 @@ function salesforceListBrigadeLeaders() {
 
   if (response.error) {
     Logger.log(`ERROR: ${response.error}`);
-    return;
+    return null;
   }
 
   return response.records;
@@ -208,7 +218,7 @@ function salesforceListBrigadeAffiliations() {
   if (response.error) {
     console.error(`ERROR fetching brigade affiliations: ${response.error}`);
     Logger.log(`ERROR: ${response.error}`);
-    return;
+    return null;
   }
 
   return response.records;
