@@ -260,6 +260,7 @@ function salesforceAuthCallback(request) {
 global.salesforceAuthCallback = salesforceAuthCallback;
 
 module.exports = {
+  salesforceBulkUpsert,
   salesforceListBrigades,
   salesforceListDonations,
   salesforceListBrigadeLeaders,
