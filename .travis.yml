@@ -6,7 +6,7 @@ env: NODE_ENV=production
 jobs:
   include:
     - stage: test
-      script: yarn run test
+      script: yarn run lint && yarn run test
     - stage: deploy
       script: bin/deploy
       if: type = push
