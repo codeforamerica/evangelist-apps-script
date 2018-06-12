@@ -90,13 +90,6 @@ function salesforceRequest(apiEndpoint) {
   return salesforceRequestRaw('GET', requestUri);
 }
 
-function importMeetup() {
-  const contactsToCreateCSV = 'Meetup_User_ID__c,FirstName,LastName,Email,MC_Brigade_Newsletter__c,Program_Interest_Brigade__c\n' +
-    '104952772000,Tom Test,Dooner,tomdooner+test@gmail.com,TRUE,TRUE\n';
-
-  const jobResults = salesforceBulkUpsert('Contact', 'Email', contactsToCreateCSV);
-}
-
 /*
  * @param object {String} Name of object to upsert
  * @param externalIdFieldName {String} The name of the field to use as an
