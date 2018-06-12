@@ -1,4 +1,5 @@
 const { SHEET_NAMES } = require('./Code.js');
+
 const DISCOURSE_ROOT_URL = 'https://discourse.codeforamerica.org';
 
 /*
@@ -7,11 +8,11 @@ const DISCOURSE_ROOT_URL = 'https://discourse.codeforamerica.org';
  * @param path {String} Request Path starting with '/'
  * @param payload {Object} Object which will be sent as JSON.
  */
-const discourseRequest = function(method, path, payload) {
-  const apiUsername = ScriptProperties.getProperty('DISCOURSE_API_USERNAME');
-  const apiKey = ScriptProperties.getProperty('DISCOURSE_API_KEY');
+const discourseRequest = function discourseRequest(method, path, payload) {
+  const apiUsername = PropertiesService.getScriptProperties().getProperty('DISCOURSE_API_USERNAME');
+  const apiKey = PropertiesService.getScriptProperties().getProperty('DISCOURSE_API_KEY');
 
-  const pathWithAuth = path + `?api_key=${apiKey}&api_username=${apiUsername}`;
+  const pathWithAuth = `${path}?api_key=${apiKey}&api_username=${apiUsername}`;
   const options = {
     method: method.toLowerCase(),
     headers: {},
@@ -22,7 +23,7 @@ const discourseRequest = function(method, path, payload) {
     options.payload = JSON.stringify(payload);
   }
 
-  return UrlFetchApp.fetch(DISCOURSE_ROOT_URL + pathWithAuth, options)
+  return UrlFetchApp.fetch(DISCOURSE_ROOT_URL + pathWithAuth, options);
 };
 
 module.exports = {
@@ -53,7 +54,7 @@ module.exports = {
     if (response.getResponseCode() < 300) {
       console.log('Successfully updated Discourse User Field with latest brigade list.');
     } else {
-      throw new Error('Got error updating Discourse: ' + response.getContentText());
+      throw new Error(`Got error updating Discourse: ${response.getContentText()}`);
     }
-  }
+  },
 };
