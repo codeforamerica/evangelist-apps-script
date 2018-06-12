@@ -24,6 +24,66 @@ function salesforceGetService() {
     .setPropertyStore(PropertiesService.getUserProperties());
 }
 
+/*
+ * Provide an API for making an arbitrary request to Salesforce, as opposed to
+ * the salesforceRequest method which assumes a "data" endpoint.
+ *
+ * @param method {String} e.g. POST, GET
+ * @param requestUri {String} e.g. '/services/data/v41.0/jobs/ingest'
+ * @param headers {Object} Any headers to add.
+ * @param payload {String} The body of the request. Make sure to set
+ *   headers['Content-Type'] to match the content of the payload.
+ */
+function salesforceRequestRaw(method, requestUri, headers, payload) {
+  var headers = headers || {};
+  const oauth = salesforceGetService();
+  const token = oauth.getToken();
+
+  if (oauth.hasAccess()) {
+    // manually check for token expiry since the salesforce token doesn't have
+    // an "expires_in" field
+    const SALESFORCE_TOKEN_TIMEOUT_SECONDS = 2 * 60 * 60; // tokens are valid for 2 hours
+    const SALESFORCE_TOKEN_TIMEOUT_BUFFER = 60; // seconds
+    const now = Math.floor(new Date().getTime() / 1000);
+    const isTokenExpired =
+      (token.granted_time + SALESFORCE_TOKEN_TIMEOUT_SECONDS) - now <
+        SALESFORCE_TOKEN_TIMEOUT_BUFFER;
+
+    if (isTokenExpired) {
+      oauth.refresh();
+    }
+
+    const options = {
+      method: method.toLowerCase(),
+      headers: Object.assign({
+        Authorization: `Bearer ${oauth.getAccessToken()}`,
+      }, headers),
+      payload,
+    };
+
+    let response;
+    let responseHeaders = {};
+
+    try {
+      response = UrlFetchApp.fetch(token.instance_url + requestUri, options);
+      responseHeaders = response.getHeaders();
+    } catch (e) {
+      return {
+        error: e.message,
+      };
+    }
+
+    if (responseHeaders['Content-Type'] && responseHeaders['Content-Type'].indexOf('application/json') === 0) {
+      const queryResult = Utilities.jsonParse(response.getContentText());
+      return queryResult;
+    }
+    return response.getContentText();
+  }
+  return {
+    error: 'No Salesforce OAuth. Run salesforceAuthorize function again.',
+  };
+}
+
 function salesforceRequest(apiEndpoint) {
   const requestUri = `/services/data/v41.0${apiEndpoint}`;
 
@@ -121,57 +181,6 @@ function salesforceBulkUpsert(object, externalIdFieldName, csv) {
   console.log(`Finished Salesforce Bulk Upsert. (Failed = ${jobResults.numberRecordsFailed}; Took = ${jobResults.totalProcessingTime})`);
 
   return jobResults;
-}
-
-// Temporarily (?) provide a more raw API for making requests to support both "data" and "async" types of requests.
-function salesforceRequestRaw(method, requestUri, headers, payload) {
-  var headers = headers || {};
-  const oauth = salesforceGetService();
-  const token = oauth.getToken();
-
-  if (oauth.hasAccess()) {
-    // manually check for token expiry since the salesforce token doesn't have
-    // an "expires_in" field
-    const SALESFORCE_TOKEN_TIMEOUT_SECONDS = 2 * 60 * 60; // tokens are valid for 2 hours
-    const SALESFORCE_TOKEN_TIMEOUT_BUFFER = 60; // seconds
-    const now = Math.floor(new Date().getTime() / 1000);
-    const isTokenExpired =
-      (token.granted_time + SALESFORCE_TOKEN_TIMEOUT_SECONDS) - now <
-        SALESFORCE_TOKEN_TIMEOUT_BUFFER;
-
-    if (isTokenExpired) {
-      oauth.refresh();
-    }
-
-    const options = {
-      method: method.toLowerCase(),
-      headers: Object.assign({
-        Authorization: `Bearer ${oauth.getAccessToken()}`,
-      }, headers),
-      payload,
-    };
-
-    let response;
-    let responseHeaders = {};
-
-    try {
-      response = UrlFetchApp.fetch(token.instance_url + requestUri, options);
-      responseHeaders = response.getHeaders();
-    } catch (e) {
-      return {
-        error: e.message,
-      };
-    }
-
-    if (responseHeaders['Content-Type'] && responseHeaders['Content-Type'].indexOf('application/json') === 0) {
-      const queryResult = Utilities.jsonParse(response.getContentText());
-      return queryResult;
-    }
-    return response.getContentText();
-  }
-  return {
-    error: 'No Salesforce OAuth. Run salesforceAuthorize function again.',
-  };
 }
 
 function salesforceListBrigades() {
