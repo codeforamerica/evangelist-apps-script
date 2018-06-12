@@ -244,6 +244,8 @@ function databaseTestBrigadeURLs() {
 }
 
 module.exports = {
+  compareDatabaseAndSalesforce,
+  databaseTestBrigadeURLs,
   importExternalSalesforceToDirectory,
   importInternalSalesforceToDirectory,
 };
