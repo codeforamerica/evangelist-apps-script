@@ -2,6 +2,7 @@
  * Object.assign polyfill from:
  *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
  */
+/* eslint-disable */
 if (typeof Object.assign !== 'function') {
   // Must be writable: true, enumerable: false, configurable: true
   Object.defineProperty(Object, 'assign', {
@@ -32,6 +33,7 @@ if (typeof Object.assign !== 'function') {
     configurable: true,
   });
 }
+/* eslint-enable */
 
 /*
  *
@@ -40,22 +42,18 @@ if (typeof Object.assign !== 'function') {
  *
  * Perfect to receive the output of Utilities.parseCsv()
  */
-function _csvRowsToJSON(rows) {
+function csvRowsToJSON(rows) {
   const headers = rows.shift();
 
-  const objectsToReturn = [];
-  for (const i in rows) {
-    const row = rows[i];
+  const objectsToReturn = rows.map((row) => {
     const obj = {};
-    for (const j in headers) {
-      obj[headers[j]] = row[j];
-    }
-    objectsToReturn.push(obj);
-  }
+    headers.forEach((header, i) => { obj[header] = row[i]; });
+    return obj;
+  });
 
   return objectsToReturn;
 }
 
 module.exports = {
-  csvRowsToJSON: _csvRowsToJSON,
+  csvRowsToJSON,
 };
