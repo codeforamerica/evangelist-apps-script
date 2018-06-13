@@ -23,6 +23,10 @@ const {
   meetupProSyncMembersAll,
 } = require('./MeetupProSync.js');
 const {
+  meetupToSalesforcePrepare,
+  meetupToSalesforceExecute,
+} = require('./MeetupToSalesforce.js');
+const {
   sendEmail,
 } = require('./SendEmail.js');
 const UpdateFormBrigadeDropdown = require('./UpdateFormBrigadeDropdown');
@@ -39,6 +43,8 @@ global.loadSalesforceData = loadSalesforceData;
 global.loadSalesforceDonationData = loadSalesforceDonationData;
 global.meetupProSyncMembersAll = meetupProSyncMembersAll;
 global.meetupProSyncMembersIncremental = meetupProSyncMembersIncremental;
+global.meetupToSalesforcePrepare = meetupToSalesforcePrepare;
+global.meetupToSalesforceExecute = meetupToSalesforceExecute;
 global.sendEmail = sendEmail;
 global.updateFormBrigadeDropdown = function updateFormBrigadeDropdown() {
   [
