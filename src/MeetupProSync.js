@@ -1,4 +1,9 @@
+const {
+  SHEET_NAMES,
+} = require('./Code.js');
+
 const MEETUP_API_KEY = PropertiesService.getScriptProperties().getProperty('MEETUP_API_KEY');
+
 /*
  * Due to Google Sheet's 2 million cell limit, we need to separate this into its own
  * spreadsheet. (It also helps with performance.)
@@ -12,12 +17,13 @@ this will return:
   { url: "https://api.meetup.com/pro/brigade/members?page=200&offset=1", rel: "next" }
 */
 const LINK_REGEXP = new RegExp('<([^>]+)>; rel="([a-zA-Z]+)"');
-function _meetupParseLinkHeader(header) {
-  let match = LINK_REGEXP.exec(header),
-    url = match ? match[1] : null,
-    rel = match ? match[2] : null;
+function meetupParseLinkHeader(header) {
+  const match = LINK_REGEXP.exec(header);
+  const url = match ? match[1] : null;
+  const rel = match ? match[2] : null;
 
   return {
+    header,
     url,
     rel,
   };
@@ -26,23 +32,26 @@ function _meetupParseLinkHeader(header) {
 
 function meetupRequest(url) {
   console.log(`Beginning request for: ${url}`);
+
+  let urlWithKey;
   if (url.indexOf('?') !== -1) {
-    url = `${url}&key=${MEETUP_API_KEY}`;
+    urlWithKey = `${url}&key=${MEETUP_API_KEY}`;
   } else {
-    url = `${url}?key=${MEETUP_API_KEY}`;
+    urlWithKey = `${url}?key=${MEETUP_API_KEY}`;
   }
 
   let response;
-  let retry = true,
-    retries = 1;
+  let retry = true;
+  let retries = 1;
   while (retry && retries > 0) {
     try {
-      response = UrlFetchApp.fetch(url);
+      response = UrlFetchApp.fetch(urlWithKey);
       retry = false;
     } catch (e) {
       if (e.message.match(/Address unavailable/) && response && response.getResponseCode() === 200) {
         console.log(`  Got error: ${e.message} but response was 200. Swallowing exception and continuing.`);
-      } else if (retries-- >= 1) {
+      } else if (retries > 0) {
+        retries -= 1;
         console.log(`  Got error: ${e.message}. Retrying in 1000 ms.`);
         Utilities.sleep(1000);
       } else {
@@ -58,29 +67,31 @@ function meetupRequest(url) {
   console.log(`  Got response (Status: ${response.getResponseCode()}; Size: ${responseBytes}b; Ratelimit: ${headers['x-ratelimit-remaining']}/${headers['x-ratelimit-limit']}; Reset in ${headers['x-ratelimit-reset']})`);
 
   if (typeof headers.Link === 'string') {
-    var parsedHeader = _meetupParseLinkHeader(headers.Link);
+    const parsedHeader = meetupParseLinkHeader(headers.Link);
     if (parsedHeader.rel) {
       links[parsedHeader.rel] = parsedHeader.url;
     } else {
       console.eror(`Could not parse link header: ${headers.Link}`);
     }
   } else if (typeof headers.Link === 'object') {
-    for (const i in headers.Link) {
-      var parsedHeader = _meetupParseLinkHeader(headers.Link[i]);
-      if (parsedHeader.rel) {
-        links[parsedHeader.rel] = parsedHeader.url;
-      } else {
-        console.error(`Could not parse link header: ${headers.Link[i]}`);
-      }
-    }
+    Object.values(headers.Link)
+      .map(meetupParseLinkHeader)
+      .forEach((parsedHeader) => {
+        if (parsedHeader.rel) {
+          links[parsedHeader.rel] = parsedHeader.url;
+        } else {
+          console.error(`Could not parse link header: ${parsedHeader.header}`);
+        }
+      });
   }
 
-  if (parseInt(headers['x-ratelimit-remaining']) >= 10) {
-    var recommendedSleepMs = 0;
+  let recommendedSleepMs;
+  if (parseInt(headers['x-ratelimit-remaining'], 10) >= 10) {
+    recommendedSleepMs = 0;
   } else {
-    var recommendedSleepMs = 1000 * (parseInt(headers['x-ratelimit-remaining']) <= 1 ?
-      parseInt(headers['x-ratelimit-reset']) :
-      parseFloat(headers['x-ratelimit-reset']) / parseInt(headers['x-ratelimit-limit']));
+    recommendedSleepMs = 1000 * (parseInt(headers['x-ratelimit-remaining'], 10) <= 1 ?
+      parseInt(headers['x-ratelimit-reset'], 10) :
+      parseFloat(headers['x-ratelimit-reset']) / parseInt(headers['x-ratelimit-limit'], 10));
   }
 
   return {
@@ -91,30 +102,23 @@ function meetupRequest(url) {
 }
 
 // converts a time like 1520367649000 to "2018-03-06 20:20:49"
-function _convertMeetupTime(datetime) {
+function convertMeetupTime(datetime) {
   const d = new Date(datetime);
   return `${[d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()].join('-')
   } ${[d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()].join(':')}`;
 }
 
-function meetupProSyncMembersIncremental() {
-  meetupProSyncMembers(true);
-}
-
-function meetupProSyncMembersAll() {
-  meetupProSyncMembers(false);
-}
-
 function meetupProSyncMembers(incremental) {
-  incremental = incremental || false;
-
-  const sheet = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID).getSheetByName(SHEET_NAMES.meetupMembers);
+  const sheet = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID)
+    .getSheetByName(SHEET_NAMES.meetupMembers);
   const sheetHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
 
+  let mostRecentId;
+
   if (incremental) {
-    var mostRecentId = parseInt(sheet.getRange(2, sheetHeaders.indexOf('Meetup ID') + 1, 1, 1).getValues()[0][0]);
+    mostRecentId = parseInt(sheet.getRange(2, sheetHeaders.indexOf('Meetup ID') + 1, 1, 1).getValues()[0][0], 10);
   } else {
-    var mostRecentId = -1; // fake value that no member ID will ever be equal too
+    mostRecentId = -1; // fake value that no member ID will ever be equal too
   }
 
   let currentPageRequest = meetupRequest('https://api.meetup.com/pro/brigade/members?page=200');
@@ -163,15 +167,24 @@ function meetupProSyncMembers(incremental) {
     sheet.getRange(2, 1, sheet.getLastRow(), sheet.getLastColumn()).clear();
   }
 
-  const rowsToAppend = [];
-  for (const i in membersToAppend) {
-    const row = [];
-    for (const j in sheetHeaders) {
-      const value = membersToAppend[i][sheetHeaders[j]];
-      row.push(typeof value !== 'undefined' ? value : '');
-    }
-    rowsToAppend.push(row);
-  }
+  const rowsToAppend = membersToAppend
+    .map(member => sheetHeaders.map(header => member[header] || ''));
+
   sheet.getRange(2, 1, rowsToAppend.length, sheet.getLastColumn())
     .setValues(rowsToAppend);
 }
+
+function meetupProSyncMembersIncremental() {
+  meetupProSyncMembers(true);
+}
+
+function meetupProSyncMembersAll() {
+  meetupProSyncMembers(false);
+}
+
+module.exports = {
+  MEETUP_MEMBERSHIP_SPREADSHEET_ID,
+  convertMeetupTime,
+  meetupProSyncMembersAll,
+  meetupProSyncMembersIncremental,
+};

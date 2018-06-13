@@ -63,27 +63,24 @@ function importSalesforceToDirectory(isInternal) {
   database.setFrozenColumns(1);
 
   const salesforce = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
-  const salesforceHeaders = salesforce.getRange(1, 1, 1, salesforce.getLastColumn()).getValues()[0];
-  const salesforceContents = salesforce.getRange(2, 1, salesforce.getLastRow(), salesforce.getLastColumn())
-    .getValues();
+  const salesforceContents = salesforce.getDataRange().getValues();
+  const salesforceHeaders = salesforceContents.shift();
 
   const brigadesToAdd = [];
 
-  for (const i in salesforceContents) {
-    const brigade = salesforceContents[i];
+  salesforceContents.forEach((brigade) => {
     const isActive = brigade[salesforceHeaders.indexOf('Active?')];
-
     if (!isActive) {
-      continue;
+      return;
     }
 
-    var primaryContactEmail;
+    let primaryContactEmail;
     // if the brigade has given us an explicit public email address, use that (with no "name")
     //   instead of the primary contact in salesforce.
     if (brigade[salesforceHeaders.indexOf('Public Contact Email')] && !isInternal) {
-      var primaryContactEmail = brigade[salesforceHeaders.indexOf('Public Contact Email')];
+      primaryContactEmail = brigade[salesforceHeaders.indexOf('Public Contact Email')];
     } else {
-      var primaryContactEmail = brigade[salesforceHeaders.indexOf('Primary Contact Email')];
+      primaryContactEmail = brigade[salesforceHeaders.indexOf('Primary Contact Email')];
     }
 
     const brigadeObject = {
@@ -101,13 +98,8 @@ function importSalesforceToDirectory(isInternal) {
       'Salesforce Account ID': brigade[salesforceHeaders.indexOf('Salesforce ID')],
     };
 
-    const brigadeRow = [];
-    for (const j in HEADERS) {
-      brigadeRow.push(brigadeObject[HEADERS[j]] || '');
-    }
-
-    brigadesToAdd.push(brigadeRow);
-  }
+    brigadesToAdd.push(HEADERS.map(header => brigadeObject[header] || ''));
+  });
 
   database.getRange(3, 1, brigadesToAdd.length, HEADERS.length).setValues(brigadesToAdd);
 }
@@ -124,93 +116,91 @@ function compareDatabaseAndSalesforce() {
   const database = SpreadsheetApp.openById(DATABASE_DOC_ID).getSheetByName(DATABASE_SHEET_NAME);
   const salesforce = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
 
-  const salesforceHeaders = salesforce.getRange(1, 1, 1, salesforce.getLastColumn()).getValues()[0];
-  const salesforceContents = salesforce.getRange(2, 1, salesforce.getLastRow(), salesforce.getLastColumn())
-    .getValues();
+  const salesforceContents = salesforce.getDataRange().getValues();
+  const salesforceHeaders = salesforceContents.shift();
 
-  const databaseHeaders = database.getRange(2, 1, 1, database.getLastColumn()).getValues()[0];
-  const databaseContents = database.getRange(3, 1, database.getLastRow(), database.getLastColumn())
-    .getValues();
+  const [
+    , // ignore above-header line
+    databaseHeaders,
+    ...databaseContents
+  ] = database.getDataRange().getValues();
 
-  for (var i in databaseContents) {
-    var brigade = databaseContents[i];
-
+  databaseContents.forEach((brigade) => {
     // attempt to find the brigade in the salesforce list
     //   by matching the Salesforce ID
-    let brigadeInSalesforce = null;
-    for (var j in salesforceContents) {
-      var b = salesforceContents[j];
-      var salesforceId = b[salesforceHeaders.indexOf('Salesforce ID')];
-      var databaseId = brigade[databaseHeaders.indexOf('Salesforce Account ID')];
-      var salesforceName = b[salesforceHeaders.indexOf('Name')];
-      var databaseName = brigade[databaseHeaders.indexOf('Brigade Name')];
+    const brigadeInSalesforce = salesforceContents.find((b) => {
+      const salesforceId = b[salesforceHeaders.indexOf('Salesforce ID')];
+      const databaseId = brigade[databaseHeaders.indexOf('Salesforce Account ID')];
+      const salesforceName = b[salesforceHeaders.indexOf('Name')];
+      const databaseName = brigade[databaseHeaders.indexOf('Brigade Name')];
 
       if (salesforceId === databaseId) {
-        brigadeInSalesforce = b;
+        return true;
       } else if (salesforceName === databaseName) {
-        brigadeInSalesforce = b;
         Logger.log(`Found by fallback name match: ${salesforceName}`);
+        return true;
       }
-    }
+
+      return false;
+    });
 
     if (!brigadeInSalesforce) {
       Logger.log(`Could not find brigade in salesforce: ${brigade[0]}`);
-      continue;
+      return;
     }
 
-    // field name, salesforce value, database value
     const different = [];
-    for (var j in FIELDS) {
-      if (brigadeInSalesforce[salesforceHeaders.indexOf(FIELDS[j][0])] !==
-        brigade[databaseHeaders.indexOf(FIELDS[j][1])]) {
-        different.push([FIELDS[j][0], brigadeInSalesforce[salesforceHeaders.indexOf(FIELDS[j][0])], brigade[databaseHeaders.indexOf(FIELDS[j][1])]]);
+    FIELDS.forEach((field) => {
+      const fieldName = field[0];
+      const salesforceValue = brigadeInSalesforce[salesforceHeaders.indexOf(field[0])];
+      const databaseValue = brigade[databaseHeaders.indexOf(field[1])];
+
+      if (salesforceValue !== databaseValue) {
+        different.push([fieldName, salesforceValue, databaseValue]);
       }
-    }
+    });
 
     if (different.length) {
       Logger.log(`${brigade[databaseHeaders.indexOf('Brigade Name')]}:`);
 
-      for (var j in different) {
-        const difference = different[j];
-        if (difference[1] && !difference[2]) {
-          Logger.log(`  ${difference[0]} missing in brigade database: ${difference[1]}`);
-        } else if (difference[2] && !difference[1]) {
-          Logger.log(`  ${difference[0]} missing in salesforce: ${difference[2]}`);
+      different.forEach(([fieldName, salesforceValue, databaseValue]) => {
+        if (salesforceValue && !databaseValue) {
+          Logger.log(`  ${fieldName} missing in brigade database: ${salesforceValue}`);
+        } else if (databaseValue && !salesforceValue) {
+          Logger.log(`  ${fieldName} missing in salesforce: ${databaseValue}`);
         } else {
-          Logger.log(`  ${difference[0]} different: ${difference[1]}/${difference[2]}`);
+          Logger.log(`  ${fieldName} different: ${salesforceValue}/${databaseValue}`);
         }
-      }
+      });
     }
-  }
+  });
 
   // find records that are in salesforce but not the database
-  for (var i in salesforceContents) {
-    var brigade = salesforceContents[i];
+  salesforceContents.forEach((brigade) => {
     const isActive = brigade[salesforceHeaders.indexOf('Active?')];
 
     if (!isActive) {
-      continue;
+      return;
     }
 
     let brigadeInDatabase = null;
-    for (var j in databaseContents) {
-      var b = databaseContents[j];
-      var salesforceId = brigade[salesforceHeaders.indexOf('Salesforce ID')];
-      var databaseId = b[databaseHeaders.indexOf('Salesforce Account ID')];
-      var salesforceName = brigade[salesforceHeaders.indexOf('Name')];
-      var databaseName = b[databaseHeaders.indexOf('Brigade Name')];
+    databaseContents.forEach((b) => {
+      const salesforceId = brigade[salesforceHeaders.indexOf('Salesforce ID')];
+      const databaseId = b[databaseHeaders.indexOf('Salesforce Account ID')];
+      const salesforceName = brigade[salesforceHeaders.indexOf('Name')];
+      const databaseName = b[databaseHeaders.indexOf('Brigade Name')];
 
       if (salesforceId === databaseId) {
         brigadeInDatabase = b;
       } else if (salesforceName === databaseName) {
         brigadeInDatabase = b;
       }
-    }
+    });
 
     if (!brigadeInDatabase) {
       Logger.log(`Missing Brigade in Database: ${brigade[salesforceHeaders.indexOf('Name')]}`);
     }
-  }
+  });
 }
 
 /*
@@ -223,27 +213,26 @@ function databaseTestBrigadeURLs() {
   const databaseContents = database.getRange(3, 1, database.getLastRow(), database.getLastColumn())
     .getValues();
 
-  for (const i in databaseContents) {
-    const row = databaseContents[i];
+  databaseContents.forEach((row) => {
     const brigadeName = row[databaseHeaders.indexOf('Brigade Name')];
     const url = row[databaseHeaders.indexOf('Website')];
 
-    if (!url || !url.length) {
-      continue;
-    }
-
-    try {
-      const resp = UrlFetchApp.fetch(url);
-      if (resp.getResponseCode() >= 300) {
-        Logger.log(`Brigade Website Error: ${brigadeName}'s website ${url} returned status ${resp.getResponseCode()}`);
+    if (url && url.length) {
+      try {
+        const resp = UrlFetchApp.fetch(url);
+        if (resp.getResponseCode() >= 300) {
+          Logger.log(`Brigade Website Error: ${brigadeName}'s website ${url} returned status ${resp.getResponseCode()}`);
+        }
+      } catch (ex) {
+        Logger.log(`Brigade Website Error: ${brigadeName}'s website ${url} returned error ${ex.message}`);
       }
-    } catch (ex) {
-      Logger.log(`Brigade Website Error: ${brigadeName}'s website ${url} returned error ${ex.message}`);
     }
-  }
+  });
 }
 
 module.exports = {
+  compareDatabaseAndSalesforce,
+  databaseTestBrigadeURLs,
   importExternalSalesforceToDirectory,
   importInternalSalesforceToDirectory,
 };

@@ -1,10 +1,22 @@
+const fullNameSplitter = require('full-name-splitter');
+
+const {
+  convertMeetupTime,
+  MEETUP_MEMBERSHIP_SPREADSHEET_ID,
+} = require('./MeetupProSync.js');
+const {
+  SHEET_NAMES,
+} = require('./Code.js');
+const {
+  salesforceListBrigadeAffiliations,
+} = require('./Salesforce.js');
+
 /*
 * TODO:
 * - Populate it, and then use it in the import.
 */
 const SALESFORCE_STAGING_SHEET_ID = '1bmSgDPBB5buJUBsYvtUND87lHEdOhDAVCq41uFdHzdM';
 
-var SHEET_NAMES = SHEET_NAMES || {};
 SHEET_NAMES.meetupToSalesforceOrganizations = '[AUTO] Meetup Organizations';
 SHEET_NAMES.meetupToSalesforceAffiliations = '[AUTO] Existing Affiliations from Salesforce';
 SHEET_NAMES.meetupToSalesforceContactsToCreate = 'Contacts to Create';
@@ -20,7 +32,7 @@ const MEETUP_TO_SALESFORCE_AFFILIATIONS_TO_UPDATE_HEADERS = [
   'npe5__Contact__r:Meetup_User_ID__c', 'npe5__Organization__c', 'npe5__StartDate__c', 'npe5__EndDate__c', 'Source__c',
 ];
 const THREE_DAYS_IN_MS = 3 * 24 * 60 * 60 * 1000;
-function _meetupToSalesforceLoadRecordsToCreateAndUpdate() {
+function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
   const meetupMembers = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID)
     .getSheetByName(SHEET_NAMES.meetupMembers)
     .getDataRange()
@@ -29,23 +41,21 @@ function _meetupToSalesforceLoadRecordsToCreateAndUpdate() {
   const meetupMembersHeaders = meetupMembers.shift();
   const contacts = [];
   const affiliations = [];
-  for (const i in meetupMembers) {
-    const meetupMember = meetupMembers[i];
-
+  meetupMembers.each((meetupMember) => {
     // don't import people without an email address
     const meetupMemberEmail = meetupMember[meetupMembersHeaders.indexOf('Email Address')];
     if (!meetupMemberEmail || !meetupMemberEmail.length) {
-      continue;
+      return;
     }
 
     // don't import people who have never attended an event
-    const meetupMemberEvents = parseInt(meetupMember[meetupMembersHeaders.indexOf('Events Attended')]);
+    const meetupMemberEvents = parseInt(meetupMember[meetupMembersHeaders.indexOf('Events Attended')], 10);
     if (meetupMemberEvents === 0) {
-      continue;
+      return;
     }
 
     // add the person to the contacts array
-    const guessedFirstAndLastName = _fullNameSplitter(meetupMember[meetupMembersHeaders.indexOf('Full Name')]);
+    const guessedFirstAndLastName = fullNameSplitter(meetupMember[meetupMembersHeaders.indexOf('Full Name')]);
     contacts.push([
       meetupMember[meetupMembersHeaders.indexOf('Meetup ID')],
       guessedFirstAndLastName[0],
@@ -57,18 +67,16 @@ function _meetupToSalesforceLoadRecordsToCreateAndUpdate() {
 
     // then, add an affiliation for every brigade
     const meetupMemberBrigades = JSON.parse(meetupMember[meetupMembersHeaders.indexOf('Chapters')]);
-    for (const j in meetupMemberBrigades) {
-      const brigade = meetupMemberBrigades[j];
-
+    meetupMemberBrigades.forEach((brigade) => {
       affiliations.push([
         meetupMember[meetupMembersHeaders.indexOf('Meetup ID')],
         `TODO: ${brigade.name}`,
-        _convertMeetupTime(meetupMember[meetupMembersHeaders.indexOf('Join Time')]),
-        _convertMeetupTime(meetupMember[meetupMembersHeaders.indexOf('Join Time')] + THREE_DAYS_IN_MS),
+        convertMeetupTime(meetupMember[meetupMembersHeaders.indexOf('Join Time')]),
+        convertMeetupTime(meetupMember[meetupMembersHeaders.indexOf('Join Time')] + THREE_DAYS_IN_MS),
         'Meetup',
       ]);
-    }
-  }
+    });
+  });
 
   Logger.log(`Dumping ${contacts.length} contacts to sheet`);
   console.log(`Dumping ${contacts.length} contacts to sheet`);
@@ -100,19 +108,15 @@ function _meetupToSalesforceLoadRecordsToCreateAndUpdate() {
 const MEETUP_TO_SALESFORCE_AFFILIATIONS_HEADERS = [
   'Affiliation Id', 'Contact Id', 'Contact Meetup User Id', 'Organization Id',
 ];
-function _meetupToSalesforceLoadExistingAffiliations() {
+function meetupToSalesforceLoadExistingAffiliations() {
   const salesforceResults = salesforceListBrigadeAffiliations();
 
-  const affiliations = [];
-  for (const i in salesforceResults) {
-    const affiliation = salesforceResults[i];
-    affiliations.push([
-      affiliation.Id,
-      affiliation.npe5__Contact__c,
-      affiliation.npe5__Contact__r.Meetup_User_ID__c,
-      affiliation.npe5__Organization__c,
-    ]);
-  }
+  const affiliations = salesforceResults.map(affiliation => [
+    affiliation.Id,
+    affiliation.npe5__Contact__c,
+    affiliation.npe5__Contact__r.Meetup_User_ID__c,
+    affiliation.npe5__Organization__c,
+  ]);
 
   SpreadsheetApp.openById(SALESFORCE_STAGING_SHEET_ID)
     .getSheetByName(SHEET_NAMES.meetupToSalesforceAffiliations)
@@ -128,10 +132,15 @@ function _meetupToSalesforceLoadExistingAffiliations() {
 }
 
 function meetupToSalesforcePrepare() {
-  _meetupToSalesforceLoadExistingAffiliations();
-  _meetupToSalesforceLoadRecordsToCreateAndUpdate();
+  meetupToSalesforceLoadExistingAffiliations();
+  meetupToSalesforceLoadRecordsToCreateAndUpdate();
 }
 
 function meetupToSalesforceExecute() {
   // do the bulk data loads
 }
+
+module.exports = {
+  meetupToSalesforcePrepare,
+  meetupToSalesforceExecute,
+};

@@ -1,3 +1,9 @@
+const { SHEET_NAMES } = require('./Code.js');
+const {
+  convertMeetupTime,
+  MEETUP_MEMBERSHIP_SPREADSHEET_ID,
+} = require('./MeetupProSync.js');
+
 /*
  * Code related to syndicating the results into Brigade-specific external sheets.
  *
@@ -19,19 +25,18 @@ const EXTERNAL_SHEETS = [
  * Open an external spreadsheet and return an existing sheet by name
  *   or create it if it doesn't exist.
  */
-function _findOrCreateExternalSheet(id, name) {
+function findOrCreateExternalSheet(id, name) {
   const doc = SpreadsheetApp.openById(id);
-  var externalSheet = doc.getSheetByName(name);
+  let externalSheet = doc.getSheetByName(name);
   if (!externalSheet) {
-    var externalSheet = doc.insertSheet(name);
+    externalSheet = doc.insertSheet(name);
   }
 
   return externalSheet;
 }
 
-function _verifyExternalSheets() {
-  for (const i in EXTERNAL_SHEETS) {
-    const brigade = EXTERNAL_SHEETS[i];
+function verifyExternalSheets() {
+  EXTERNAL_SHEETS.forEach((brigade) => {
     if (!brigade.sheetId) {
       throw new Error(`EXTERNAL_SHEETS item missing 'sheetId': ${JSON.stringify(brigade)}`);
     }
@@ -41,21 +46,12 @@ function _verifyExternalSheets() {
     if (!brigade.meetupUrlname) {
       throw new Error(`EXTERNAL_SHEETS item missing 'meetupUrlname': ${JSON.stringify(brigade)}`);
     }
-  }
-}
-
-function externalSheetSyncAll() {
-  _verifyExternalSheets();
-
-  externalSheetAddInstructions();
-  externalSheetSyncMeetup();
-  externalSheetSyncDonations();
+  });
 }
 
 function externalSheetAddInstructions() {
-  for (const i in EXTERNAL_SHEETS) {
-    const brigade = EXTERNAL_SHEETS[i];
-    const externalSheet = _findOrCreateExternalSheet(brigade.sheetId, '[AUTO] Instructions');
+  EXTERNAL_SHEETS.forEach((brigade) => {
+    const externalSheet = findOrCreateExternalSheet(brigade.sheetId, '[AUTO] Instructions');
 
     const INSTRUCTIONS = [
       ['Notes:'],
@@ -70,37 +66,39 @@ function externalSheetAddInstructions() {
     externalSheet.clear();
     externalSheet.getRange(1, 1, INSTRUCTIONS.length, INSTRUCTIONS[0].length)
       .setValues(INSTRUCTIONS);
-  }
+  });
 }
 
 function externalSheetSyncMeetup() {
-  const sheet = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID).getSheetByName(SHEET_NAMES.meetupMembers);
-  const memberHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const members = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
+  const sheet = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID)
+    .getSheetByName(SHEET_NAMES.meetupMembers);
 
-  for (const i in EXTERNAL_SHEETS) {
-    const brigade = EXTERNAL_SHEETS[i];
+  const [
+    memberHeaders,
+    ...members
+  ] = sheet.getDataRange().getValues();
+
+  EXTERNAL_SHEETS.forEach((brigade) => {
     Logger.log(`Syncing membership for ${brigade.name}`);
-    const externalSheet = _findOrCreateExternalSheet(brigade.sheetId, '[AUTO] Members');
+    const externalSheet = findOrCreateExternalSheet(brigade.sheetId, '[AUTO] Members');
 
     const brigadeMembers = [];
 
-    for (const j in members) {
-      const member = members[j];
+    members.forEach((member) => {
       const memberChapters = JSON.parse(member[memberHeaders.indexOf('Chapters')]);
-      for (const k in memberChapters) {
-        if (memberChapters[k].urlname === brigade.meetupUrlname) {
+      memberChapters.forEach((chapter) => {
+        if (chapter.urlname === brigade.meetupUrlname) {
           brigadeMembers.push([
             member[memberHeaders.indexOf('Meetup ID')],
             member[memberHeaders.indexOf('Full Name')],
             member[memberHeaders.indexOf('Email Address')],
             member[memberHeaders.indexOf('Events Attended')],
-            _convertMeetupTime(member[memberHeaders.indexOf('Join Time')]),
-            _convertMeetupTime(member[memberHeaders.indexOf('Last Access Time')]),
+            convertMeetupTime(member[memberHeaders.indexOf('Join Time')]),
+            convertMeetupTime(member[memberHeaders.indexOf('Last Access Time')]),
           ]);
         }
-      }
-    }
+      });
+    });
 
     Logger.log(`  found ${brigadeMembers.length} members`);
 
@@ -127,7 +125,7 @@ function externalSheetSyncMeetup() {
     externalSheet.autoResizeColumn(headers.indexOf('Email') + 1);
     externalSheet.autoResizeColumn(headers.indexOf('Join Time') + 1);
     externalSheet.autoResizeColumn(headers.indexOf('Last Access Time') + 1);
-  }
+  });
 }
 
 function externalSheetSyncDonations() {
@@ -135,23 +133,23 @@ function externalSheetSyncDonations() {
   const donationHeaders = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const donations = sheet.getRange(2, 1, sheet.getLastRow(), sheet.getLastColumn()).getValues();
 
-  for (const i in EXTERNAL_SHEETS) {
-    const brigade = EXTERNAL_SHEETS[i];
-    const externalSheet = _findOrCreateExternalSheet(brigade.sheetId, '[AUTO] Donations');
+  EXTERNAL_SHEETS.forEach((brigade) => {
+    const externalSheet = findOrCreateExternalSheet(brigade.sheetId, '[AUTO] Donations');
     const brigadeDonations = [];
 
-    for (const j in donations) {
-      const donationBrigadeName = donations[j][donationHeaders.indexOf('Brigade Designation')];
+    donations.forEach((donation) => {
+      const donationBrigadeName = donation[donationHeaders.indexOf('Brigade Designation')];
+
       if (donationBrigadeName === brigade.name) {
         brigadeDonations.push([
-          donations[j][donationHeaders.indexOf('Date')],
-          donations[j][donationHeaders.indexOf('Name')],
-          donations[j][donationHeaders.indexOf('Email')],
-          donations[j][donationHeaders.indexOf('Amount')],
-          donations[j][donationHeaders.indexOf('Description')],
+          donation[donationHeaders.indexOf('Date')],
+          donation[donationHeaders.indexOf('Name')],
+          donation[donationHeaders.indexOf('Email')],
+          donation[donationHeaders.indexOf('Amount')],
+          donation[donationHeaders.indexOf('Description')],
         ]);
       }
-    }
+    });
 
     const headers = ['Date', 'Name', 'Email', 'Amount', 'Description'];
     externalSheet.clearContents();
@@ -161,7 +159,7 @@ function externalSheetSyncDonations() {
     externalSheet.setFrozenRows(1);
 
     if (!brigadeDonations.length) {
-      continue;
+      return;
     }
 
     // populate actual data
@@ -174,5 +172,17 @@ function externalSheetSyncDonations() {
     externalSheet.autoResizeColumn(headers.indexOf('Email') + 1);
     externalSheet.getRange(1, headers.indexOf('Amount') + 1, externalSheet.getLastRow(), 1)
       .setNumberFormat('$0.00');
-  }
+  });
 }
+
+function externalSheetSyncAll() {
+  verifyExternalSheets();
+
+  externalSheetAddInstructions();
+  externalSheetSyncMeetup();
+  externalSheetSyncDonations();
+}
+
+module.exports = {
+  externalSheetSyncAll,
+};

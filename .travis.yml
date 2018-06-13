@@ -1,12 +1,12 @@
 language: node_js
+cache: yarn
 node_js:
   # match this with .node-version:
   - "8.9.4"
-env: NODE_ENV=production
 jobs:
   include:
     - stage: test
-      script: yarn run test
+      script: yarn run lint && yarn run test
     - stage: deploy
-      script: bin/deploy
+      script: NODE_ENV=production bin/deploy
       if: type = push
