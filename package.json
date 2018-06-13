@@ -23,6 +23,6 @@
   "scripts": {
     "build": "webpack",
     "lint": "eslint src webpack.config.js",
-    "test": "webpack"
+    "test": "webpack -p"
   }
 }
