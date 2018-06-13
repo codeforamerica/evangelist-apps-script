@@ -2,6 +2,7 @@
 require('./Util.js');
 
 const {
+  createTriggers,
   loadAll,
   loadSalesforceData,
   loadSalesforceDonationData,
@@ -27,6 +28,7 @@ const {
 const UpdateFormBrigadeDropdown = require('./UpdateFormBrigadeDropdown');
 
 // register all public methods so they can be called by Google Apps Script
+global.createTriggers = createTriggers;
 global.discourseSyncBrigadeList = discourseSyncBrigadeList;
 global.externalSheetSyncAll = externalSheetSyncAll;
 global.importExternalSalesforceToDirectory = importExternalSalesforceToDirectory;
