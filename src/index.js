@@ -1,8 +1,7 @@
-// load Object polyfills
+// load polyfills
 require('./Util.js');
 
 const {
-  SHEET_NAMES,
   loadAll,
   loadSalesforceData,
   loadSalesforceDonationData,
@@ -25,7 +24,6 @@ const {
 const {
   sendEmail,
 } = require('./SendEmail.js');
-const SlackSignupForm = require('./SlackSignupForm');
 const UpdateFormBrigadeDropdown = require('./UpdateFormBrigadeDropdown');
 
 const SLACK_SIGNUP_FORM_ID = '17BXzqiA_cYAfpDSILHDnlavQOXV8kHgsYWp4f8ayUt4';
@@ -42,19 +40,14 @@ global.loadSalesforceDonationData = loadSalesforceDonationData;
 global.meetupProSyncMembersAll = meetupProSyncMembersAll;
 global.meetupProSyncMembersIncremental = meetupProSyncMembersIncremental;
 global.sendEmail = sendEmail;
-global.slackSignupForm = function slackSignupForm() {
-  const form = new SlackSignupForm(
-    SpreadsheetApp.getActive().getId(),
-    SHEET_NAMES.salesforce,
-    SLACK_SIGNUP_FORM_ID,
-  );
-
-  form.updateField();
-};
 global.updateFormBrigadeDropdown = function updateFormBrigadeDropdown() {
   [
     // form id, question title
-    '1BDA2LSngoOMw9qqQL4Pmv4K9qzJPeQzFPy6FxkIiGOc', 'Which Brigade is hosting this event?',
+
+    // slack signup form @ slack.codeforamerica.org:
+    [SLACK_SIGNUP_FORM_ID, 'If you attend Brigade events, which Brigade do you attend?'],
+    // NDoCH 2018 signup form
+    ['1BDA2LSngoOMw9qqQL4Pmv4K9qzJPeQzFPy6FxkIiGOc', 'Which Brigade is hosting this event?'],
   ].forEach(([formId, questionTitle]) =>
-    new UpdateFormBrigadeDropdown(formId, questionTitle).update());
+    new UpdateFormBrigadeDropdown(formId, questionTitle).updateField());
 };
