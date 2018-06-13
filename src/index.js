@@ -26,8 +26,6 @@ const {
 } = require('./SendEmail.js');
 const UpdateFormBrigadeDropdown = require('./UpdateFormBrigadeDropdown');
 
-const SLACK_SIGNUP_FORM_ID = '17BXzqiA_cYAfpDSILHDnlavQOXV8kHgsYWp4f8ayUt4';
-
 // register all public methods so they can be called by Google Apps Script
 global.discourseSyncBrigadeList = discourseSyncBrigadeList;
 global.externalSheetSyncAll = externalSheetSyncAll;
@@ -42,10 +40,10 @@ global.meetupProSyncMembersIncremental = meetupProSyncMembersIncremental;
 global.sendEmail = sendEmail;
 global.updateFormBrigadeDropdown = function updateFormBrigadeDropdown() {
   [
-    // form id, question title
+    // [form id, question title]
 
     // slack signup form @ slack.codeforamerica.org:
-    [SLACK_SIGNUP_FORM_ID, 'If you attend Brigade events, which Brigade do you attend?'],
+    ['17BXzqiA_cYAfpDSILHDnlavQOXV8kHgsYWp4f8ayUt4', 'If you attend Brigade events, which Brigade do you attend?'],
     // NDoCH 2018 signup form
     ['1BDA2LSngoOMw9qqQL4Pmv4K9qzJPeQzFPy6FxkIiGOc', 'Which Brigade is hosting this event?'],
   ].forEach(([formId, questionTitle]) =>
