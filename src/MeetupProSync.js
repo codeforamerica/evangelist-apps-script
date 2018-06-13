@@ -73,8 +73,8 @@ function meetupRequest(url) {
     } else {
       console.eror(`Could not parse link header: ${headers.Link}`);
     }
-  } else if (typeof headers.Link === 'object') {
-    Object.values(headers.Link)
+  } else if (typeof headers.Link === 'object') { // it's actually an array, but arrays are objects
+    headers.Link
       .map(meetupParseLinkHeader)
       .forEach((parsedHeader) => {
         if (parsedHeader.rel) {
