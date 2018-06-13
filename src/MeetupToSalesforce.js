@@ -78,9 +78,7 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
     });
   });
 
-  Logger.log(`Dumping ${contacts.length} contacts to sheet`);
   console.log(`Dumping ${contacts.length} contacts to sheet`);
-  Logger.log(`Dumping ${affiliations.length} affiliations to sheet`);
   console.log(`Dumping ${affiliations.length} affiliations to sheet`);
 
   // finally, dump everything to the sheet
