@@ -386,6 +386,8 @@ function createTriggers() {
     .timeBased().everyHours(1).create(); // hourly
   ScriptApp.newTrigger('slackSignupForm')
     .timeBased().everyHours(1).create(); // hourly
+  ScriptApp.newTrigger('updateFormBrigadeDropdown')
+    .timeBased().everyHours(1).create(); // hourly
 
   // brigade dashboards / external sheet data loading:
   ScriptApp.newTrigger('loadSalesforceDonationData')

@@ -3,6 +3,8 @@
  *
  * Handles the logic of updating the Slack Signup form with the updated brigade
  * list.
+ *
+ * TODO: Migrate this into UpdateFormBrigadeDropdown.js
  */
 class SlackSignupForm {
   constructor(brigadeListId, brigadeListSheetName, formId) {

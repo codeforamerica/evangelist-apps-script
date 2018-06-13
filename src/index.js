@@ -2,6 +2,13 @@
 require('./Util.js');
 
 const {
+  SHEET_NAMES,
+  loadAll,
+  loadSalesforceData,
+  loadSalesforceDonationData,
+  loadSalesforceBrigadeLeaders,
+} = require('./Code.js');
+const {
   discourseSyncBrigadeList,
 } = require('./Discourse.js');
 const {
@@ -12,13 +19,6 @@ const {
   importExternalSalesforceToDirectory,
 } = require('./BrigadeDatabase.js');
 const {
-  SHEET_NAMES,
-  loadAll,
-  loadSalesforceData,
-  loadSalesforceDonationData,
-  loadSalesforceBrigadeLeaders,
-} = require('./Code.js');
-const {
   meetupProSyncMembersIncremental,
   meetupProSyncMembersAll,
 } = require('./MeetupProSync.js');
@@ -26,6 +26,7 @@ const {
   sendEmail,
 } = require('./SendEmail.js');
 const SlackSignupForm = require('./SlackSignupForm');
+const UpdateFormBrigadeDropdown = require('./UpdateFormBrigadeDropdown');
 
 const SLACK_SIGNUP_FORM_ID = '17BXzqiA_cYAfpDSILHDnlavQOXV8kHgsYWp4f8ayUt4';
 
@@ -49,4 +50,11 @@ global.slackSignupForm = function slackSignupForm() {
   );
 
   form.updateField();
+};
+global.updateFormBrigadeDropdown = function updateFormBrigadeDropdown() {
+  [
+    // form id, question title
+    '1BDA2LSngoOMw9qqQL4Pmv4K9qzJPeQzFPy6FxkIiGOc', 'Which Brigade is hosting this event?',
+  ].forEach(([formId, questionTitle]) =>
+    new UpdateFormBrigadeDropdown(formId, questionTitle).update());
 };
