@@ -13,6 +13,7 @@ const {
 } = require('./BrigadeDatabase.js');
 const {
   SHEET_NAMES,
+  loadAll,
   loadSalesforceData,
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,
@@ -33,6 +34,7 @@ global.discourseSyncBrigadeList = discourseSyncBrigadeList;
 global.externalSheetSyncAll = externalSheetSyncAll;
 global.importExternalSalesforceToDirectory = importExternalSalesforceToDirectory;
 global.importInternalSalesforceToDirectory = importInternalSalesforceToDirectory;
+global.loadAll = loadAll;
 global.loadSalesforceBrigadeLeaders = loadSalesforceBrigadeLeaders;
 global.loadSalesforceData = loadSalesforceData;
 global.loadSalesforceDonationData = loadSalesforceDonationData;
