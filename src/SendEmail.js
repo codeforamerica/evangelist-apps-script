@@ -23,7 +23,7 @@ function sendEmail() {
   const idxMissingBrigadeInfo = contents[0].indexOf('Missing from brigade-information');
   const idxMissingPrimaryContact = contents[0].indexOf('Missing Primary Contact');
   const idxAddBrigadeLeads = contents[0].indexOf('Add to brigadeleads@');
-  const idxMissingMeetupUserId = contents[0].indexOf('Missing Meetup User ID');
+  const idxMissingMeetupGroupId = contents[0].indexOf('Missing Meetup Group ID');
 
   contents.shift(); // remove header row
 
@@ -59,10 +59,10 @@ function sendEmail() {
   });
   body += '</ul>';
 
-  body += '<p>Missing Meetup User ID in Salesforce:</p><ul>';
+  body += '<p>Missing Meetup Group ID in Salesforce:</p><ul>';
   contents.forEach((row) => {
-    if (row[idxMissingMeetupUserId] && row[idxMissingMeetupUserId].length) {
-      body += `<li>${row[idxMissingMeetupUserId]}</li>`;
+    if (row[idxMissingMeetupGroupId] && row[idxMissingMeetupGroupId].length) {
+      body += `<li>${row[idxMissingMeetupGroupId]}</li>`;
     }
   });
 
