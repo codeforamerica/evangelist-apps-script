@@ -112,7 +112,7 @@ function loadSalesforceData() {
       isActiveBrigade,
       brigade.Website || brigade.Site_Link__c,
       brigade.MeetUp_Link__c,
-      brigade.MeetUp_User_ID__c,
+      brigade.MeetUp_Group_ID__c,
       brigade.Brigade_Location__c,
       brigade.Organization_Twitter__c,
       brigade.Github_URL__c,

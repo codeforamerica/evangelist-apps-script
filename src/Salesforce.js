@@ -177,7 +177,7 @@ function salesforceBulkUpsert(object, externalIdFieldName, csv) {
 }
 
 function salesforceListBrigades() {
-  const soql = 'SELECT Id, Name, Brigade_Type__c, Brigade_Status__c, npe01__One2OneContact__r.Name, npe01__One2OneContact__r.Email, Brigade_Public_Email__c, Website, Site_Link__c, MeetUp_Link__c, MeetUp_User_ID__c, Brigade_Location__c, Organization_Twitter__c, Github_URL__c, Facebook_Page_URL__c' +
+  const soql = 'SELECT Id, Name, Brigade_Type__c, Brigade_Status__c, npe01__One2OneContact__r.Name, npe01__One2OneContact__r.Email, Brigade_Public_Email__c, Website, Site_Link__c, MeetUp_Link__c, MeetUp_Group_ID__c, Brigade_Location__c, Organization_Twitter__c, Github_URL__c, Facebook_Page_URL__c' +
     " FROM Account WHERE Brigade_Type__c = 'Brigade' ORDER BY Name";
   const response = salesforceRequest(`/query?q=${encodeURIComponent(soql)}`);
 
