@@ -26,6 +26,51 @@ SHEET_NAMES.meetupToSalesforceAffiliationsToUpdate = '3. Affiliations to Upsert'
 
 const TMP_MEETUP_USER_ID_FILTER = id => parseInt(id, 10) === 104952772;
 
+const EXISTING_AFFILIATIONS = (function loadExistingAffiliations() {
+  const [
+    affiliationHeaders,
+    ...affiliations
+  ] = SpreadsheetApp
+    .openById(SALESFORCE_STAGING_SHEET_ID)
+    .getSheetByName(SHEET_NAMES.meetupToSalesforceAffiliations)
+    .getDataRange()
+    .getValues();
+
+  return affiliations.reduce((a, row) => {
+    a[[ // eslint-disable-line
+      row[affiliationHeaders.indexOf('Contact Meetup User Id')],
+      row[affiliationHeaders.indexOf('Organization Id')],
+    ]] = row[affiliationHeaders.indexOf('Affiliation Id')];
+
+    return a;
+  }, {});
+}());
+
+const BRIGADES_BY_MEETUP_ID = (function loadBrigadesByMeetupId() {
+  const [
+    salesforceHeaders,
+    ...salesforceData
+  ] = SpreadsheetApp
+    .getActive()
+    .getSheetByName(SHEET_NAMES.salesforce)
+    .getDataRange()
+    .getValues();
+
+  return salesforceData.reduce((a, row) => {
+    const salesforceId = row[salesforceHeaders.indexOf('Salesforce ID')];
+    const meetupUserId = row[salesforceHeaders.indexOf('Meetup User ID')];
+    if (!meetupUserId) {
+      return a;
+    }
+
+    a[meetupUserId] = salesforceId; // eslint-disable-line
+
+    return a;
+  });
+}());
+Logger.log(EXISTING_AFFILIATIONS);
+Logger.log(BRIGADES_BY_MEETUP_ID);
+
 /*
  * Populates the "Contacts to Create" / "Affiliations to Create"
  *
@@ -33,6 +78,7 @@ const TMP_MEETUP_USER_ID_FILTER = id => parseInt(id, 10) === 104952772;
  *   Load brigade name -> salesforce ID map
  *   Wire it up on the Affiliations to Upsert page
  *   Actually make sure that any loaded Affiliations to upsert have the existing ID
+ *   Rename SALESFORCE_STAGING_SHEET_ID
  *
  */
 const MEETUP_TO_SALESFORCE_CONTACTS_HEADERS = [
@@ -42,7 +88,7 @@ const MEETUP_TO_SALESFORCE_CONTACTS_UPSERT_HEADERS = [
   'Email', 'Meetup_User_ID__c', 'MC_Brigade_Newsletter__c', 'Program_Interest_Brigade__c',
 ];
 const MEETUP_TO_SALESFORCE_AFFILIATIONS_TO_UPDATE_HEADERS = [
-  'npe5__Contact__r:Meetup_User_ID__c', 'npe5__Organization__c', 'npe5__StartDate__c', 'npe5__EndDate__c', 'Source__c',
+  'Id', 'npe5__Contact__r:Meetup_User_ID__c', 'npe5__Organization__c', 'npe5__StartDate__c', 'npe5__EndDate__c', 'Source__c',
 ];
 const THREE_MONTHS_IN_MS = 3 * 30 * 24 * 60 * 60 * 1000;
 function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
@@ -82,9 +128,16 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
 
       const meetupMemberBrigades = JSON.parse(member[meetupMembersHeaders.indexOf('Chapters')]);
       meetupMemberBrigades.forEach((brigade) => {
-        affiliations.push([
+        const orgSalesforceId = BRIGADES_BY_MEETUP_ID[brigade.id];
+        const affiliationKey = [
           member[meetupMembersHeaders.indexOf('Meetup ID')],
-          `TODO: ${brigade.name}`,
+          orgSalesforceId,
+        ];
+
+        affiliations.push([
+          EXISTING_AFFILIATIONS[affiliationKey] || '',
+          member[meetupMembersHeaders.indexOf('Meetup ID')],
+          orgSalesforceId,
           convertMeetupTime(member[meetupMembersHeaders.indexOf('Join Time')]),
           convertMeetupTime(member[meetupMembersHeaders.indexOf('Last Access Time')] + THREE_MONTHS_IN_MS),
           'Meetup',
