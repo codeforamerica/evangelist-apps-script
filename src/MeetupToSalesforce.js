@@ -68,8 +68,6 @@ const BRIGADES_BY_MEETUP_ID = (function loadBrigadesByMeetupId() {
     return a;
   });
 }());
-Logger.log(EXISTING_AFFILIATIONS);
-Logger.log(BRIGADES_BY_MEETUP_ID);
 
 /*
  * Populates the "Contacts to Create" / "Affiliations to Create"
