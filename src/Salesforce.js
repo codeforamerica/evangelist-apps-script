@@ -1,4 +1,5 @@
 /* global OAuth2 */
+const assign = require('core-js/library/fn/object/assign');
 
 const { csvRowsToJSON } = require('./Util.js');
 
@@ -55,7 +56,7 @@ function salesforceRequestRaw(method, requestUri, headers, payload) {
 
     const options = {
       method: method.toLowerCase(),
-      headers: Object.assign({
+      headers: assign({
         Authorization: `Bearer ${oauth.getAccessToken()}`,
       }, requestHeaders),
       payload,

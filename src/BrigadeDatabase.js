@@ -1,3 +1,4 @@
+const find = require('core-js/library/fn/array/find');
 const {
   SHEET_NAMES,
 } = require('./Code.js');
@@ -128,7 +129,7 @@ function compareDatabaseAndSalesforce() {
   databaseContents.forEach((brigade) => {
     // attempt to find the brigade in the salesforce list
     //   by matching the Salesforce ID
-    const brigadeInSalesforce = salesforceContents.find((b) => {
+    const brigadeInSalesforce = find(salesforceContents, (b) => {
       const salesforceId = b[salesforceHeaders.indexOf('Salesforce ID')];
       const databaseId = brigade[databaseHeaders.indexOf('Salesforce Account ID')];
       const salesforceName = b[salesforceHeaders.indexOf('Name')];

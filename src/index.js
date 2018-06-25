@@ -1,6 +1,3 @@
-// load polyfills
-require('./Util.js');
-
 const {
   createTriggers,
   loadAll,
