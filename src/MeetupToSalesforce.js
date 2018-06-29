@@ -27,7 +27,14 @@ SHEET_NAMES.meetupToSalesforceContactsToCreate = '1. Contacts to Create';
 SHEET_NAMES.meetupToSalesforceContactsToUpsert = '2. Contacts to Upsert';
 SHEET_NAMES.meetupToSalesforceAffiliationsToUpdate = '3. Affiliations to Upsert';
 
-const TMP_MEETUP_USER_ID_FILTER = id => parseInt(id, 10) === 104952772;
+const TMP_MEETUP_USER_ID_FILTER = id =>
+  [
+    104952772,
+    14053930,
+    54867052,
+    192364358,
+    114660122,
+  ].indexOf(parseInt(id, 10)) > -1;
 
 function loadExistingAffiliations() {
   const [
