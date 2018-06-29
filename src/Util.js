@@ -1,4 +1,26 @@
 /*
+ * Convert a date object into ISO8601
+ * @param date {Date}
+ * @return {String} e.g. "2018-06-28T22:07:03Z"
+ */
+function dateToISO8601(date) {
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  const hour = date.getUTCHours();
+  const minute = date.getUTCMinutes();
+  const second = date.getUTCSeconds();
+
+  return (
+    `${date.getUTCFullYear()}-` + // eslint-disable-line prefer-template
+    (month < 10 ? '0' : '') + `${month}-` +
+    (day < 10 ? '0' : '') + `${day}T` +
+    (hour < 10 ? '0' : '') + `${hour}:` +
+    (minute < 10 ? '0' : '') + `${minute}:` +
+    (second < 10 ? '0' : '') + `${second}Z`
+  );
+}
+
+/*
  *
  * Given a 2d array like [[header1, header2, header3], [value1, value2, value3], ...], returns
  *   { "header1": "value1", etc. }
@@ -17,6 +39,26 @@ function csvRowsToJSON(rows) {
   return objectsToReturn;
 }
 
+/*
+ * Simple CSV generator.
+ * Assumes there are no commas or quotation marks in the data.
+ */
+function rowsToCSV(rows) {
+  const toString = (el) => {
+    // format dates
+    if (el instanceof Date) {
+      return dateToISO8601(el);
+    } else if (el === '') {
+      return null;
+    }
+
+    return el.toString();
+  };
+
+  return rows.map(row => row.map(toString).join(',')).join('\n');
+}
+
 module.exports = {
+  rowsToCSV,
   csvRowsToJSON,
 };
