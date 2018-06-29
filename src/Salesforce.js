@@ -92,29 +92,33 @@ function salesforceRequest(apiEndpoint) {
 }
 
 /*
- * @param object {String} Name of object to upsert
- * @param externalIdFieldName {String} The name of the field to use as an
+ * @param object {String} Name of object to insert/upsert
+ * @param csv {String} The CSV of records to insert/upsert.
+ * @param externalIdFieldName {String?} The name of the field to use as an
  *   external ID to find records that already exist. This can be Id, Email, or
  *   any custom defined external IDs for that object.
- * @param csv {String} The CSV of records to upsert.
+ * @param operation {String?} One of 'upsert' or 'insert'.
  */
-function salesforceBulkUpsert(object, externalIdFieldName, csv) {
+function salesforceBulkRequest(object, csv, operation = 'upsert', externalIdFieldName = '') {
   let response;
   let jobFinished = false;
   const jobResults = {};
 
-  console.log(`Starting Salesforce Bulk Upsert (object = ${object}; externalIdFieldName = ${externalIdFieldName}; csv = ${csv.length} bytes)`);
+  console.log(`Starting Salesforce Bulk ${operation} (object = ${object}; externalIdFieldName = ${externalIdFieldName}; csv = ${csv.length} bytes)`);
 
   // 1. create upsert batch
+  const params = {
+    object,
+    operation,
+    contentType: 'CSV',
+  };
+  if (operation === 'upsert') {
+    params.externalIdFieldName = externalIdFieldName;
+  }
   response = salesforceRequestRaw(
     'POST', '/services/data/v41.0/jobs/ingest',
     { 'Content-Type': 'application/json', Accept: 'application/json' },
-    JSON.stringify({
-      object,
-      operation: 'upsert',
-      contentType: 'CSV',
-      externalIdFieldName,
-    }),
+    JSON.stringify(params),
   );
 
   if (response.error) {
@@ -261,7 +265,7 @@ function salesforceAuthCallback(request) {
 global.salesforceAuthCallback = salesforceAuthCallback;
 
 module.exports = {
-  salesforceBulkUpsert,
+  salesforceBulkRequest,
   salesforceListBrigades,
   salesforceListDonations,
   salesforceListBrigadeLeaders,
