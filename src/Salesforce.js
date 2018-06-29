@@ -158,6 +158,7 @@ function salesforceBulkRequest(object, csv, operation = 'upsert', externalIdFiel
   }
 
   jobResults.success = response.state === 'JobComplete';
+  jobResults.errorMessage = response.errorMessage;
   jobResults.totalProcessingTime = response.totalProcessingTime;
   jobResults.numberRecordsFailed = response.numberRecordsFailed;
   jobResults.numberRecordsProcessed = response.numberRecordsProcessed;
