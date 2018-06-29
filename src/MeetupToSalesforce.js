@@ -1,4 +1,9 @@
 // TODO: figure out why "default" is required here
+const {
+  salesforceBulkRequest,
+  salesforceListBrigadeAffiliations,
+} = require('./Salesforce');
+
 const fullNameSplitter = require('full-name-splitter').default;
 
 const {
@@ -8,9 +13,7 @@ const {
 const {
   SHEET_NAMES,
 } = require('./Code.js');
-const {
-  salesforceListBrigadeAffiliations,
-} = require('./Salesforce.js');
+const { rowsToCSV } = require('./Util');
 
 /*
  * The staging sheet is meant to give a bit of visibility into the process and
@@ -26,7 +29,7 @@ SHEET_NAMES.meetupToSalesforceAffiliationsToUpdate = '3. Affiliations to Upsert'
 
 const TMP_MEETUP_USER_ID_FILTER = id => parseInt(id, 10) === 104952772;
 
-const EXISTING_AFFILIATIONS = (function loadExistingAffiliations() {
+function loadExistingAffiliations() {
   const [
     affiliationHeaders,
     ...affiliations
@@ -44,7 +47,7 @@ const EXISTING_AFFILIATIONS = (function loadExistingAffiliations() {
 
     return a;
   }, {});
-}());
+}
 
 const BRIGADES_BY_MEETUP_ID = (function loadBrigadesByMeetupId() {
   const [
@@ -71,13 +74,6 @@ const BRIGADES_BY_MEETUP_ID = (function loadBrigadesByMeetupId() {
 
 /*
  * Populates the "Contacts to Create" / "Affiliations to Create"
- *
- * TODO:
- *   Load brigade name -> salesforce ID map
- *   Wire it up on the Affiliations to Upsert page
- *   Actually make sure that any loaded Affiliations to upsert have the existing ID
- *   Rename SALESFORCE_STAGING_SHEET_ID
- *
  */
 const MEETUP_TO_SALESFORCE_CONTACTS_HEADERS = [
   'Meetup_User_ID__c', 'FirstName', 'LastName', 'Email', 'MC_Brigade_Newsletter__c', 'Program_Interest_Brigade__c',
@@ -86,7 +82,7 @@ const MEETUP_TO_SALESFORCE_CONTACTS_UPSERT_HEADERS = [
   'Email', 'Meetup_User_ID__c', 'MC_Brigade_Newsletter__c', 'Program_Interest_Brigade__c',
 ];
 const MEETUP_TO_SALESFORCE_AFFILIATIONS_TO_UPDATE_HEADERS = [
-  'Id', 'npe5__Contact__r:Meetup_User_ID__c', 'npe5__Organization__c', 'npe5__StartDate__c', 'npe5__EndDate__c', 'Source__c',
+  'Id', 'npe5__Contact__r.Meetup_User_ID__c', 'npe5__Organization__c', 'npe5__StartDate__c', 'npe5__EndDate__c', 'Source__c',
 ];
 const THREE_MONTHS_IN_MS = 3 * 30 * 24 * 60 * 60 * 1000;
 function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
@@ -95,6 +91,7 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
     .getDataRange()
     .getValues();
 
+  const existingAffiliations = loadExistingAffiliations();
   const meetupMembersHeaders = meetupMembers.shift();
   const contactsToAdd = [];
   const contactsToUpsert = [];
@@ -133,7 +130,7 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
         ];
 
         affiliations.push([
-          EXISTING_AFFILIATIONS[affiliationKey] || '',
+          existingAffiliations[affiliationKey] || '',
           member[meetupMembersHeaders.indexOf('Meetup ID')],
           orgSalesforceId,
           convertMeetupTime(member[meetupMembersHeaders.indexOf('Join Time')]),
@@ -210,7 +207,71 @@ function meetupToSalesforcePrepare() {
 }
 
 function meetupToSalesforceExecute() {
-  // do the bulk data loads
+  let csv;
+  let response;
+
+  console.log('Beginning Meetup -> Salesforce sync');
+
+  // 1. bulk create contacts
+  const contactsToCreate =
+    SpreadsheetApp.openById(SALESFORCE_STAGING_SHEET_ID)
+      .getSheetByName(SHEET_NAMES.meetupToSalesforceContactsToCreate)
+      .getDataRange()
+      .getValues();
+
+  csv = rowsToCSV(contactsToCreate);
+  response = salesforceBulkRequest(
+    'Contact',
+    csv,
+    'insert',
+  );
+  if (response.error) {
+    throw new Error(`Error creating contacts: ${response.error}`);
+  } else if (!response.success) {
+    throw new Error(`Job failed creating contacts: ${response.errorMessage}`);
+  }
+
+  // 2. bulk upsert contacts
+  const contactsToUpsert =
+    SpreadsheetApp.openById(SALESFORCE_STAGING_SHEET_ID)
+      .getSheetByName(SHEET_NAMES.meetupToSalesforceContactsToUpsert)
+      .getDataRange()
+      .getValues();
+
+  csv = rowsToCSV(contactsToUpsert);
+  response = salesforceBulkRequest(
+    'Contact',
+    csv,
+    'upsert',
+    'Email',
+  );
+  if (response.error) {
+    throw new Error(`Error upserting contacts: ${response.error}`);
+  } else if (!response.success) {
+    throw new Error(`Job failed upserting contacts: ${response.errorMessage}`);
+  }
+
+  // 3. bulk upsert affiliations
+  const affiliationsToUpsert =
+    SpreadsheetApp.openById(SALESFORCE_STAGING_SHEET_ID)
+      .getSheetByName(SHEET_NAMES.meetupToSalesforceAffiliationsToUpdate)
+      .getDataRange()
+      .getValues();
+
+  csv = rowsToCSV(affiliationsToUpsert);
+  response = salesforceBulkRequest(
+    'npe5__Affiliation__c',
+    csv,
+    'upsert',
+    'Id',
+  );
+  if (response.error) {
+    throw new Error(`Error upserting affiliations: ${response.error}`);
+  } else if (!response.success) {
+    throw new Error(`Job failed upserting affiliations: ${response.errorMessage}`);
+  }
+
+  console.log('Finished Meetup -> Salesforce sync');
 }
 
 module.exports = {

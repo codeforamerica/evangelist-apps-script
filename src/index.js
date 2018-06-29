@@ -42,6 +42,10 @@ global.meetupProSyncMembersAll = meetupProSyncMembersAll;
 global.meetupProSyncMembersIncremental = meetupProSyncMembersIncremental;
 global.meetupToSalesforcePrepare = meetupToSalesforcePrepare;
 global.meetupToSalesforceExecute = meetupToSalesforceExecute;
+global.meetupToSalesforceSync = () => {
+  meetupToSalesforcePrepare();
+  meetupToSalesforceExecute();
+};
 global.sendEmail = sendEmail;
 global.updateFormBrigadeDropdown = function updateFormBrigadeDropdown() {
   [
