@@ -387,7 +387,7 @@ function createTriggers() {
   ScriptApp.newTrigger('updateFormBrigadeDropdown')
     .timeBased().everyHours(1).create(); // hourly
 
-  // brigade dashboards / external sheet data loading:
+  // brigade dashboards / load data for external sheet:
   ScriptApp.newTrigger('loadSalesforceDonationData')
     .timeBased().everyDays(1).atHour(19)
     .create(); // 7pm
@@ -398,10 +398,15 @@ function createTriggers() {
     .timeBased().everyDays(1).atHour(19)
     .create(); // 7pm
 
-  // brigade dashboards / external sheet data loading:
+  // propagate data to brigade dashboards
   ScriptApp.newTrigger('externalSheetSyncAll')
     .timeBased().everyDays(1).atHour(20)
     .create(); // 8pm
+
+  // sync users from meetup -> salesforce
+  ScriptApp.newTrigger('meetupToSalesforceSync')
+    .timeBased().everyDays(1).atHour(23)
+    .create(); // 11pm
 
   // send the overview email
   ScriptApp.newTrigger('sendEmail')
