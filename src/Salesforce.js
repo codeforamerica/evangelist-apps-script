@@ -177,7 +177,7 @@ function salesforceBulkRequest(object, csv, operation = 'upsert', externalIdFiel
     { 'Content-Type': 'application/json; charset=UTF-8', Accept: 'text/csv' },
   );
   jobResults.failedResults = csvRowsToJSON(Utilities.parseCsv(response));
-  console.log(`Finished Salesforce Bulk Upsert. (Failed = ${jobResults.numberRecordsFailed}; Took = ${jobResults.totalProcessingTime})`);
+  console.log(`Finished Salesforce Bulk ${operation}. (Processed = ${jobResults.numberRecordsProcessed}; Failed = ${jobResults.numberRecordsFailed}; Took = ${jobResults.totalProcessingTime})`);
 
   return jobResults;
 }
