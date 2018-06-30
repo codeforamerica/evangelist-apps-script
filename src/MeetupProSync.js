@@ -50,7 +50,7 @@ function meetupRequest(url) {
     } catch (e) {
       if (e.message.match(/Address unavailable/) && response && response.getResponseCode() === 200) {
         console.log(`  Got error: ${e.message} but response was 200. Swallowing exception and continuing.`);
-      } else if (retries > 0) {
+      } else {
         retries -= 1;
         // with 2 retries left, sleep 1 second
         // with 1 retry left, sleep 6 seconds
@@ -58,9 +58,6 @@ function meetupRequest(url) {
         const delayMs = (1 + (5 * (2 - retries))) * 1000;
         console.log(`  Got error: ${e.message}. Retrying in ${delayMs} ms.`);
         Utilities.sleep(delayMs);
-      } else {
-        console.log(`Throwing: ${e}`);
-        throw e;
       }
     }
   }
