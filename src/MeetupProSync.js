@@ -41,24 +41,32 @@ function meetupRequest(url) {
   }
 
   let response;
-  let retry = true;
-  let retries = 1;
-  while (retry && retries > 0) {
+  let success = false;
+  let retries = 3;
+  while (!success && retries > 0) {
     try {
       response = UrlFetchApp.fetch(urlWithKey);
-      retry = false;
+      success = true;
     } catch (e) {
       if (e.message.match(/Address unavailable/) && response && response.getResponseCode() === 200) {
         console.log(`  Got error: ${e.message} but response was 200. Swallowing exception and continuing.`);
       } else if (retries > 0) {
         retries -= 1;
-        console.log(`  Got error: ${e.message}. Retrying in 1000 ms.`);
-        Utilities.sleep(1000);
+        // with 2 retries left, sleep 1 second
+        // with 1 retry left, sleep 6 seconds
+        // with 0 retries left, sleep 11 seconds
+        const delayMs = (1 + (5 * (2 - retries))) * 1000;
+        console.log(`  Got error: ${e.message}. Retrying in ${delayMs} ms.`);
+        Utilities.sleep(delayMs);
       } else {
         console.log(`Throwing: ${e}`);
         throw e;
       }
     }
+  }
+
+  if (!success) {
+    throw new Error('  Error fetching Meetup members. Retried 3 times to no avail.');
   }
 
   const headers = response.getAllHeaders();
