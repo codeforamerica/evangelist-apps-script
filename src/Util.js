@@ -59,6 +59,7 @@ function rowsToCSV(rows) {
 }
 
 module.exports = {
+  dateToISO8601,
   rowsToCSV,
   csvRowsToJSON,
 };

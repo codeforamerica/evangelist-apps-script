@@ -11,6 +11,7 @@
     "core-js": "^2.5.7",
     "full-name-splitter": "^1.1.1",
     "gas-webpack-plugin": "^0.2.1",
+    "jasmine": "^3.1.0",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.15"
   },
