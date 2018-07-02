@@ -65,6 +65,8 @@ function sendEmail() {
       body += `<li>${row[idxMissingMeetupGroupId]}</li>`;
     }
   });
+  body += '</ul>';
+  body += '<p>(Look up Meetup Group IDs at <a href="https://secure.meetup.com/meetup_api/console/?path=/:urlname">https://secure.meetup.com/meetup_api/console/?path=/:urlname</a>)</p>';
 
   body += `<p>Other Log Output:</p><pre>${Logger.getLog()}</pre>`;
 
