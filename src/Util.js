@@ -41,15 +41,32 @@ function csvRowsToJSON(rows) {
 
 /*
  * Simple CSV generator.
- * Assumes there are no commas or quotation marks in the data.
  */
 function rowsToCSV(rows) {
   const toString = (el) => {
     // format dates
     if (el instanceof Date) {
       return dateToISO8601(el);
-    } else if (el === '') {
-      return null;
+    } else if (typeof el === 'string') {
+      let escaped = el;
+      let surroundInQuotes = false;
+
+      // surround in quotes if data contains a comma or newline
+      if (escaped.indexOf(',') !== -1 || escaped.indexOf('\n') !== -1) {
+        surroundInQuotes = true;
+      }
+
+      // escape " -> ""
+      if (escaped.indexOf('"') !== -1) {
+        surroundInQuotes = true;
+        escaped = escaped.replace(/"/g, '""');
+      }
+
+      if (surroundInQuotes) {
+        escaped = `"${escaped}"`;
+      }
+
+      return escaped;
     }
 
     return el.toString();

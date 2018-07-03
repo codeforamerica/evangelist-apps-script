@@ -18,6 +18,23 @@ describe('rowsToCSV', () => {
   it('converts rows to CSV', () => {
     expect(rowsToCSV(this.data)).toEqual('header1,header2\ndata1,1234');
   });
+
+  describe('escaping behavior', () => {
+    it('escapes quotation marks', () => {
+      expect(rowsToCSV([['row "quote here" data', 'other data']]))
+        .toEqual('"row ""quote here"" data",other data')
+    });
+
+    it('quotes the fields containing commas', () => {
+      expect(rowsToCSV([['123,456,789', 'other data']]))
+        .toEqual('"123,456,789",other data')
+    });
+
+    it('quotes the fields containing newlines', () => {
+      expect(rowsToCSV([['testing\nfoobar', 'other data']]))
+        .toEqual('"testing\nfoobar",other data')
+    });
+  });
 });
 
 describe('csvRowsToJSON', () => {
