@@ -71,12 +71,14 @@ class MeetupClient {
     }
 
     let recommendedSleepMs;
-    if (parseInt(headers['x-ratelimit-remaining'], 10) >= 10) {
+    const ratelimitRemaining = parseInt(headers['x-ratelimit-remaining'], 10);
+    const ratelimitReset = parseInt(headers['x-ratelimit-reset'], 10);
+
+    if (ratelimitRemaining >= 10) {
       recommendedSleepMs = 0;
     } else {
-      recommendedSleepMs = 1000 * (parseInt(headers['x-ratelimit-remaining'], 10) <= 1 ?
-        parseInt(headers['x-ratelimit-reset'], 10) :
-        parseFloat(headers['x-ratelimit-reset']) / parseInt(headers['x-ratelimit-limit'], 10));
+      recommendedSleepMs = 1000 * (ratelimitRemaining <= 1 ?
+        ratelimitReset : ratelimitReset / ratelimitRemaining);
     }
 
     return new MeetupResponse({

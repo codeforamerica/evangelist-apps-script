@@ -52,6 +52,45 @@ describe('MeetupClient', () => {
       });
     });
 
+    describe('with a response with a rate limit', () => {
+      it('does not recommend sleeping until remaining < 10', () => {
+        spyOn(UrlFetchApp, 'fetch').and.returnValue(mockMeetupResponse(200, {
+          'x-ratelimit-remaining': 11,
+          'x-ratelimit-reset': 10,
+          'x-ratelimit-limit': 30,
+        }));
+
+        const client = new MeetupClient();
+        const response = client.meetupRequest('/foo/bar');
+        expect(response.recommendedSleepMs).toEqual(0);
+      });
+
+      it('calculates recommendedSleepMs properly', () => {
+        spyOn(UrlFetchApp, 'fetch').and.returnValue(mockMeetupResponse(200, {
+          'x-ratelimit-remaining': 2,
+          'x-ratelimit-reset': 10,
+          'x-ratelimit-limit': 30,
+        }));
+
+        // when two requests remain, sleep for 10 / 2 = 5 seconds
+        const client = new MeetupClient();
+        const response = client.meetupRequest('/foo/bar');
+        expect(response.recommendedSleepMs).toEqual(5000);
+      });
+
+      it('recommends sleeping for the whole time when one request remains', () => {
+        spyOn(UrlFetchApp, 'fetch').and.returnValue(mockMeetupResponse(200, {
+          'x-ratelimit-remaining': 1,
+          'x-ratelimit-reset': 10,
+          'x-ratelimit-limit': 30,
+        }));
+
+        const client = new MeetupClient();
+        const response = client.meetupRequest('/foo/bar');
+        expect(response.recommendedSleepMs).toEqual(10000);
+      });
+    });
+
     describe('with a paginated response', () => {
       beforeEach(() => {
         this.linkUrl = 'https://api.meetup.com/pro/brigade/members?page=200&offset=1';
