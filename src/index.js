@@ -22,7 +22,8 @@ const {
 const {
   meetupToSalesforcePrepare,
   meetupToSalesforceExecute,
-} = require('./MeetupToSalesforce.js');
+  meetupToSalesforceSyncActiveCounts,
+} = require('./MeetupToSalesforce');
 const {
   sendEmail,
 } = require('./SendEmail.js');
@@ -42,6 +43,7 @@ global.meetupProSyncMembersAll = meetupProSyncMembersAll;
 global.meetupProSyncMembersIncremental = meetupProSyncMembersIncremental;
 global.meetupToSalesforcePrepare = meetupToSalesforcePrepare;
 global.meetupToSalesforceExecute = meetupToSalesforceExecute;
+global.meetupToSalesforceSyncActiveCounts = meetupToSalesforceSyncActiveCounts;
 global.meetupToSalesforceSync = () => {
   meetupToSalesforcePrepare();
   meetupToSalesforceExecute();

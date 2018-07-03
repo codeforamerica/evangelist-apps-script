@@ -407,6 +407,10 @@ function createTriggers() {
   ScriptApp.newTrigger('meetupToSalesforceSync')
     .timeBased().everyDays(1).atHour(23)
     .create(); // 11pm
+  // sync "1-yr active member count"
+  ScriptApp.newTrigger('meetupToSalesforceSyncActiveCounts')
+    .timeBased().everyDays(1).atHour(23)
+    .create(); // 11pm
 
   // send the overview email
   ScriptApp.newTrigger('sendEmail')

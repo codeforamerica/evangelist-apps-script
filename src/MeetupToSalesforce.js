@@ -2,6 +2,7 @@
 const {
   salesforceBulkRequest,
   salesforceListBrigadeAffiliations,
+  salesforceListBrigades,
 } = require('./Salesforce');
 
 const fullNameSplitter = require('full-name-splitter').default;
@@ -281,7 +282,56 @@ function meetupToSalesforceExecute() {
   console.log('Finished Meetup -> Salesforce sync');
 }
 
+const ONE_YEAR_IN_MS = 365 * 24 * 60 * 60 * 1000;
+function meetupToSalesforceSyncActiveCounts() {
+  console.log('Beginning sync of Meetup 1-yr active counts');
+
+  const meetupMembers = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID)
+    .getSheetByName(SHEET_NAMES.meetupMembers)
+    .getDataRange()
+    .getValues();
+  const meetupMembersHeaders = meetupMembers.shift();
+
+  const attendanceByMeetupId = {};
+  console.log(`Found ${meetupMembers.length} members total`);
+
+  meetupMembers.forEach((member) => {
+    // filter out members who haven't been to meetup lately
+    const lastAccessTime = member[meetupMembersHeaders.indexOf('Last Access Time')];
+    if (new Date() - lastAccessTime >= ONE_YEAR_IN_MS) {
+      return;
+    }
+
+    const meetupMemberBrigades = JSON.parse(member[meetupMembersHeaders.indexOf('Chapters')]);
+    meetupMemberBrigades.forEach((brigade) => {
+      attendanceByMeetupId[brigade.id] = attendanceByMeetupId[brigade.id] || 0;
+      attendanceByMeetupId[brigade.id] += 1;
+    });
+  });
+
+  const brigadesToUpdate = [['Id', 'Meetup_1_yr_active_member_count__c']];
+  const brigades = salesforceListBrigades();
+  brigades.forEach((brigade) => {
+    if (!brigade.MeetUp_Group_ID__c || !attendanceByMeetupId[brigade.MeetUp_Group_ID__c]) {
+      return;
+    }
+
+    brigadesToUpdate.push([
+      brigade.Id,
+      attendanceByMeetupId[brigade.MeetUp_Group_ID__c],
+    ]);
+  });
+
+  const response = salesforceBulkRequest('Account', rowsToCSV(brigadesToUpdate), 'update');
+  if (response.error || response.errorMessage) {
+    throw new Error(`Error syncing Meetup 1-yr active counts: ${response.error || response.errorMessage}`);
+  }
+
+  console.log('Finished sync of Meetup 1-yr active counts');
+}
+
 module.exports = {
   meetupToSalesforcePrepare,
   meetupToSalesforceExecute,
+  meetupToSalesforceSyncActiveCounts,
 };
