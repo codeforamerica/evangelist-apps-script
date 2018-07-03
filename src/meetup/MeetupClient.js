@@ -81,7 +81,7 @@ class MeetupClient {
 
     return new MeetupResponse({
       client: this,
-      responseText: JSON.parse(response.getContentText()),
+      responseText: response.getContentText(),
       links,
       recommendedSleepMs,
     });

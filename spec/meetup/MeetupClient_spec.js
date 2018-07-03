@@ -44,10 +44,11 @@ describe('MeetupClient', () => {
         expect(response.hasNextPage()).toEqual(false);
       });
 
-      it('returns a response object with the parsed body', () => {
+      it('returns a response object with the responseText and body', () => {
         const client = new MeetupClient();
         const response = client.meetupRequest('/foo/bar');
-        expect(response.responseText).toEqual({ success: true });
+        expect(JSON.parse(response.responseText)).toEqual({ success: true });
+        expect(response.body()).toEqual({ success: true });
       });
     });
 
