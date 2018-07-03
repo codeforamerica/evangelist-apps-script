@@ -9,6 +9,7 @@
     "babel-preset-google-apps-script": "^0.0.3",
     "copy-webpack-plugin": "^4.5.1",
     "core-js": "^2.5.7",
+    "eslint-plugin-jasmine": "^2.10.1",
     "full-name-splitter": "^1.1.1",
     "gas-webpack-plugin": "^0.2.1",
     "jasmine": "^3.1.0",
