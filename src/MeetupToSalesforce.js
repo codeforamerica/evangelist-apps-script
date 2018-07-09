@@ -28,15 +28,6 @@ SHEET_NAMES.meetupToSalesforceContactsToCreate = '1. Contacts to Create';
 SHEET_NAMES.meetupToSalesforceContactsToUpsert = '2. Contacts to Upsert';
 SHEET_NAMES.meetupToSalesforceAffiliationsToUpdate = '3. Affiliations to Upsert';
 
-const TMP_MEETUP_USER_ID_FILTER = id =>
-  [
-    104952772,
-    14053930,
-    54867052,
-    192364358,
-    114660122,
-  ].indexOf(parseInt(id, 10)) > -1;
-
 function loadExistingAffiliations() {
   const [
     affiliationHeaders,
@@ -108,8 +99,6 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
   meetupMembers
     // only sync members with email addresses
     .filter(member => member[meetupMembersHeaders.indexOf('Email Address')])
-    // temporarily filter out almost everyone for testing
-    .filter(member => TMP_MEETUP_USER_ID_FILTER(member[meetupMembersHeaders.indexOf('Meetup ID')]))
     .forEach((member) => {
       const guessedFirstAndLastName = fullNameSplitter(member[meetupMembersHeaders.indexOf('Full Name')]);
 
