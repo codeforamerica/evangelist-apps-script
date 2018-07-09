@@ -57,6 +57,7 @@ function meetupProSyncMembers(incremental) {
     return; // nothing left to do here!
   }
 
+  console.log('Clearing Meetup member range');
   if (incremental) {
     // prepend rows
     sheet.insertRowsBefore(2, membersToAppend.length);
@@ -65,9 +66,11 @@ function meetupProSyncMembers(incremental) {
     sheet.getRange(2, 1, sheet.getLastRow(), sheet.getLastColumn()).clear();
   }
 
+  console.log('Converting Meetup member data format');
   const rowsToAppend = membersToAppend
     .map(member => sheetHeaders.map(header => member[header] || ''));
 
+  console.log('Replacing data with new Meetup members');
   sheet.getRange(2, 1, rowsToAppend.length, sheet.getLastColumn())
     .setValues(rowsToAppend);
 }
