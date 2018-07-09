@@ -102,6 +102,12 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
     .forEach((member) => {
       const guessedFirstAndLastName = fullNameSplitter(member[meetupMembersHeaders.indexOf('Full Name')]);
 
+      // only sync members with a last name
+      // (to comply with salesforce last name requirement)
+      if (!guessedFirstAndLastName[1]) {
+        return;
+      }
+
       contactsToAdd.push([
         member[meetupMembersHeaders.indexOf('Meetup ID')],
         guessedFirstAndLastName[0],
@@ -121,6 +127,12 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
       const meetupMemberBrigades = JSON.parse(member[meetupMembersHeaders.indexOf('Chapters')]);
       meetupMemberBrigades.forEach((brigade) => {
         const orgSalesforceId = BRIGADES_BY_MEETUP_ID[brigade.id];
+
+        // skip orgs without "Meetup Group IDs" in Salesforce
+        if (!orgSalesforceId) {
+          return;
+        }
+
         const affiliationKey = [
           member[meetupMembersHeaders.indexOf('Meetup ID')],
           orgSalesforceId,
