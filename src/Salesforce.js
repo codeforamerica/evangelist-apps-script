@@ -225,14 +225,7 @@ function salesforceListBrigadeAffiliations() {
   // our custom field.
   const soql = "SELECT Id, npe5__Contact__c, npe5__Contact__r.Name, npe5__Contact__r.Meetup_User_ID__c, npe5__Organization__c, npe5__Organization__r.Name FROM npe5__Affiliation__c WHERE (npe5__Organization__r.Type = 'Brigade' OR npe5__Organization__r.Brigade_Type__c = 'Brigade') AND Source__c = 'Meetup'";
   const client = new SalesforceClient();
-  const response = client.query(soql);
-
-  if (response.error) {
-    console.error(`ERROR fetching brigade affiliations: ${response.error}`);
-    return null;
-  }
-
-  return response.records;
+  return client.query(soql);
 }
 
 // callback from a menu in the spreadsheet

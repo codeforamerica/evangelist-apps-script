@@ -13,12 +13,27 @@ class SalesforceClient {
 
   /*
    * Perform a SOQL query using the REST API.
+   * Handles pagination and throws an error if anything goes wrong.
+   *
    * See: https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_query.htm?search_text=query
    */
   query(soql) {
-    const requestUri = `/services/data/v41.0/query?q=${encodeURIComponent(soql)}`;
+    let response;
+    let requestUri = `/services/data/v41.0/query?q=${encodeURIComponent(soql)}`;
+    let records = [];
 
-    return this.salesforceRequestRaw('GET', requestUri);
+    do {
+      response = this.salesforceRequestRaw('GET', requestUri);
+
+      if (response.error) {
+        throw new Error(`ERROR fetching from Salesforce: ${response.error}`);
+      }
+
+      records = records.concat(response.records);
+      requestUri = response.nextRecordsUrl;
+    } while (!response.done);
+
+    return records;
   }
 
   /*
