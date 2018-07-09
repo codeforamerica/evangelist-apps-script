@@ -2,6 +2,7 @@
 const assign = require('core-js/library/fn/object/assign');
 
 const { csvRowsToJSON } = require('./Util.js');
+const SalesforceClient = require('./salesforce/SalesforceClient');
 
 function salesforceGetService() {
   const sfConsumerKey = PropertiesService.getScriptProperties().getProperty('SALESFORCE_CONSUMER_KEY');
@@ -223,11 +224,11 @@ function salesforceListBrigadeAffiliations() {
   // Sometimes Account.Type is empty(?!?), to be extra safe let's fall back to
   // our custom field.
   const soql = "SELECT Id, npe5__Contact__c, npe5__Contact__r.Name, npe5__Contact__r.Meetup_User_ID__c, npe5__Organization__c, npe5__Organization__r.Name FROM npe5__Affiliation__c WHERE (npe5__Organization__r.Type = 'Brigade' OR npe5__Organization__r.Brigade_Type__c = 'Brigade') AND Source__c = 'Meetup'";
-  const response = salesforceRequest(`/query?q=${encodeURIComponent(soql)}`);
+  const client = new SalesforceClient();
+  const response = client.query(soql);
 
   if (response.error) {
     console.error(`ERROR fetching brigade affiliations: ${response.error}`);
-    Logger.log(`ERROR: ${response.error}`);
     return null;
   }
 
