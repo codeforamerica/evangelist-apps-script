@@ -1,5 +1,7 @@
-const SalesforceOAuth = require('./SalesforceOAuth');
 const assign = require('core-js/library/fn/object/assign');
+
+const { csvRowsToJSON } = require('../Util');
+const SalesforceOAuth = require('./SalesforceOAuth');
 
 /*
  * To set up Salesforce sync, take the following steps:
