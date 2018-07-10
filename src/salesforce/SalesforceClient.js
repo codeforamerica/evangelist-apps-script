@@ -1,6 +1,19 @@
 const SalesforceOAuth = require('./SalesforceOAuth');
 const assign = require('core-js/library/fn/object/assign');
 
+/*
+ * To set up Salesforce sync, take the following steps:
+ * 1. Sign up for a Developer Edition account
+ * 2. Create a "Connected App" with the Callback URL set to
+ *
+ *    https://script.google.com/macros/d/{script_id}/usercallback
+ *
+ *    where {script_id} is found in File > Project properties
+ * 3. Copy the App's Consumer Key and Consumer Secret into "Script Properties"
+ *    in the "File > Project properties" dialog
+ * 4. Run the "salesforceAuthorize" function in the "Salesforce.gs" script
+ *    and click the "Authorize" link that appears in the spreadsheet.
+ */
 class SalesforceClient {
   constructor() {
     this.auth = new SalesforceOAuth();
