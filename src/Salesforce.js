@@ -1,7 +1,4 @@
 /* global OAuth2 */
-const assign = require('core-js/library/fn/object/assign');
-
-const { csvRowsToJSON } = require('./Util.js');
 const SalesforceClient = require('./salesforce/SalesforceClient');
 
 function salesforceGetService() {
@@ -24,157 +21,6 @@ function salesforceGetService() {
     .setCallbackFunction('salesforceAuthCallback')
   // Set the property store where authorized tokens should be persisted.
     .setPropertyStore(PropertiesService.getUserProperties());
-}
-
-/*
- * Provide an API for making an arbitrary request to Salesforce, as opposed to
- * the salesforceRequest method which assumes a "data" endpoint.
- *
- * @param method {String} e.g. POST, GET
- * @param requestUri {String} e.g. '/services/data/v41.0/jobs/ingest'
- * @param headers {Object} Any headers to add.
- * @param payload {String} The body of the request. Make sure to set
- *   headers['Content-Type'] to match the content of the payload.
- */
-function salesforceRequestRaw(method, requestUri, headers, payload) {
-  const requestHeaders = headers || {};
-  const oauth = salesforceGetService();
-  const token = oauth.getToken();
-
-  if (oauth.hasAccess()) {
-    // manually check for token expiry since the salesforce token doesn't have
-    // an "expires_in" field
-    const SALESFORCE_TOKEN_TIMEOUT_SECONDS = 2 * 60 * 60; // tokens are valid for 2 hours
-    const SALESFORCE_TOKEN_TIMEOUT_BUFFER = 60; // seconds
-    const now = Math.floor(new Date().getTime() / 1000);
-    const isTokenExpired =
-      (token.granted_time + SALESFORCE_TOKEN_TIMEOUT_SECONDS) - now <
-        SALESFORCE_TOKEN_TIMEOUT_BUFFER;
-
-    if (isTokenExpired) {
-      oauth.refresh();
-    }
-
-    const options = {
-      method: method.toLowerCase(),
-      headers: assign({
-        Authorization: `Bearer ${oauth.getAccessToken()}`,
-      }, requestHeaders),
-      payload,
-    };
-
-    let response;
-    let responseHeaders = {};
-
-    try {
-      response = UrlFetchApp.fetch(token.instance_url + requestUri, options);
-      responseHeaders = response.getHeaders();
-    } catch (e) {
-      return {
-        error: e.message,
-      };
-    }
-
-    if (responseHeaders['Content-Type'] && responseHeaders['Content-Type'].indexOf('application/json') === 0) {
-      const queryResult = Utilities.jsonParse(response.getContentText());
-      return queryResult;
-    }
-    return response.getContentText();
-  }
-  return {
-    error: 'No Salesforce OAuth. Run salesforceAuthorize function again.',
-  };
-}
-
-/*
- * @param object {String} Name of object to insert/upsert
- * @param csv {String} The CSV of records to insert/upsert.
- * @param externalIdFieldName {String?} The name of the field to use as an
- *   external ID to find records that already exist. This can be Id, Email, or
- *   any custom defined external IDs for that object.
- * @param operation {String?} One of 'upsert' or 'insert'.
- */
-function salesforceBulkRequest(object, csv, operation = 'upsert', externalIdFieldName = '') {
-  let response;
-  let jobFinished = false;
-  const jobResults = {};
-
-  console.log(`Starting Salesforce Bulk ${operation} (object = ${object}; externalIdFieldName = ${externalIdFieldName}; csv = ${csv.length} bytes)`);
-
-  // 1. create upsert batch
-  const params = {
-    object,
-    operation,
-    contentType: 'CSV',
-  };
-  if (operation === 'upsert') {
-    params.externalIdFieldName = externalIdFieldName;
-  }
-  response = salesforceRequestRaw(
-    'POST', '/services/data/v41.0/jobs/ingest',
-    { 'Content-Type': 'application/json', Accept: 'application/json' },
-    JSON.stringify(params),
-  );
-
-  if (response.error) {
-    return {
-      error: `Error creating Bulk API Job: ${response.error}`,
-    };
-  }
-
-  const jobId = response.id;
-
-  // 2. Add a batch to that job
-  response = salesforceRequestRaw(
-    'PUT', `/services/data/v41.0/jobs/ingest/${jobId}/batches`,
-    { 'Content-Type': 'text/csv', Accept: 'application/json' },
-    csv,
-  );
-
-  if (response.error) {
-    return { error: `Got error when creating job batch: ${response.error}` };
-  }
-
-  // 3. Close the job so it starts!
-  response = salesforceRequestRaw(
-    'PATCH', `/services/data/v41.0/jobs/ingest/${jobId}`,
-    { 'Content-Type': 'application/json' },
-    JSON.stringify({ state: 'UploadComplete' }),
-  );
-
-  // 4. Poll until complete
-  while (!jobFinished) {
-    Utilities.sleep(1000);
-    response = salesforceRequestRaw(
-      'GET', `/services/data/v41.0/jobs/ingest/${jobId}`,
-      { 'Content-Type': 'application/json; charset=UTF-8', Accept: 'application/json' },
-    );
-    jobFinished = ['Aborted', 'JobComplete', 'Failed'].indexOf(response.state) !== -1;
-  }
-
-  jobResults.success = response.state === 'JobComplete';
-  jobResults.errorMessage = response.errorMessage;
-  jobResults.totalProcessingTime = response.totalProcessingTime;
-  jobResults.numberRecordsFailed = response.numberRecordsFailed;
-  jobResults.numberRecordsProcessed = response.numberRecordsProcessed;
-
-  // 5. Fetch successful results
-  response = salesforceRequestRaw(
-    'GET', `/services/data/v41.0/jobs/ingest/${jobId}/successfulResults/`,
-    { 'Content-Type': 'application/json; charset=UTF-8', Accept: 'text/csv' },
-  );
-
-  jobResults.successfulResults = csvRowsToJSON(Utilities.parseCsv(response));
-
-  // 6. Fetch failed results
-  response = salesforceRequestRaw(
-    'GET', `/services/data/v41.0/jobs/ingest/${jobId}/failedResults/`,
-    { 'Content-Type': 'application/json; charset=UTF-8', Accept: 'text/csv' },
-  );
-  jobResults.failedResults = csvRowsToJSON(Utilities.parseCsv(response));
-  console.log(`Finished Salesforce Bulk ${operation}. (Processed = ${jobResults.numberRecordsProcessed}; Failed = ${jobResults.numberRecordsFailed}; Took = ${jobResults.totalProcessingTime})`);
-
-  return jobResults;
 }
 
 function salesforceListBrigades() {
@@ -238,7 +84,6 @@ function salesforceAuthCallback(request) {
 global.salesforceAuthCallback = salesforceAuthCallback;
 
 module.exports = {
-  salesforceBulkRequest,
   salesforceListBrigades,
   salesforceListDonations,
   salesforceListBrigadeLeaders,

@@ -1,9 +1,9 @@
 // TODO: figure out why "default" is required here
 const {
-  salesforceBulkRequest,
   salesforceListBrigadeAffiliations,
   salesforceListBrigades,
 } = require('./Salesforce');
+const SalesforceClient = require('./salesforce/SalesforceClient');
 
 const fullNameSplitter = require('full-name-splitter').default;
 
@@ -216,10 +216,11 @@ function meetupToSalesforcePrepare() {
 }
 
 function meetupToSalesforceExecute() {
+  console.log('Beginning Meetup -> Salesforce sync');
+
   let csv;
   let response;
-
-  console.log('Beginning Meetup -> Salesforce sync');
+  const salesforce = new SalesforceClient();
 
   // 1. bulk create contacts
   const contactsToCreate =
@@ -229,7 +230,7 @@ function meetupToSalesforceExecute() {
       .getValues();
 
   csv = rowsToCSV(contactsToCreate);
-  response = salesforceBulkRequest(
+  response = salesforce.salesforceBulkRequest(
     'Contact',
     csv,
     'insert',
@@ -248,7 +249,7 @@ function meetupToSalesforceExecute() {
       .getValues();
 
   csv = rowsToCSV(contactsToUpsert);
-  response = salesforceBulkRequest(
+  response = salesforce.salesforceBulkRequest(
     'Contact',
     csv,
     'upsert',
@@ -268,7 +269,7 @@ function meetupToSalesforceExecute() {
       .getValues();
 
   csv = rowsToCSV(affiliationsToUpsert);
-  response = salesforceBulkRequest(
+  response = salesforce.salesforceBulkRequest(
     'npe5__Affiliation__c',
     csv,
     'upsert',
@@ -286,6 +287,8 @@ function meetupToSalesforceExecute() {
 const ONE_YEAR_IN_MS = 365 * 24 * 60 * 60 * 1000;
 function meetupToSalesforceSyncActiveCounts() {
   console.log('Beginning sync of Meetup 1-yr active counts');
+
+  const salesforce = new SalesforceClient();
 
   const meetupMembers = SpreadsheetApp.openById(MEETUP_MEMBERSHIP_SPREADSHEET_ID)
     .getSheetByName(SHEET_NAMES.meetupMembers)
@@ -323,7 +326,7 @@ function meetupToSalesforceSyncActiveCounts() {
     ]);
   });
 
-  const response = salesforceBulkRequest('Account', rowsToCSV(brigadesToUpdate), 'update');
+  const response = salesforce.salesforceBulkRequest('Account', rowsToCSV(brigadesToUpdate), 'update');
   if (response.error || response.errorMessage) {
     throw new Error(`Error syncing Meetup 1-yr active counts: ${response.error || response.errorMessage}`);
   }
