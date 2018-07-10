@@ -86,12 +86,6 @@ function salesforceRequestRaw(method, requestUri, headers, payload) {
   };
 }
 
-function salesforceRequest(apiEndpoint) {
-  const requestUri = `/services/data/v41.0${apiEndpoint}`;
-
-  return salesforceRequestRaw('GET', requestUri);
-}
-
 /*
  * @param object {String} Name of object to insert/upsert
  * @param csv {String} The CSV of records to insert/upsert.
