@@ -1,4 +1,4 @@
-const { BrigadeList } = require('./BrigadeDirectory');
+const { BrigadeList } = require('./Brigade');
 const {
   salesforceListBrigades,
   salesforceListDonations,
