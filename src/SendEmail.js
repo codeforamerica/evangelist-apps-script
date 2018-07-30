@@ -5,7 +5,7 @@ const {
 const {
   compareDatabaseAndSalesforce,
   databaseTestBrigadeURLs,
-} = require('./BrigadeDatabase.js');
+} = require('./BrigadeDirectory.js');
 
 // eslint-di
 function sendEmail() {

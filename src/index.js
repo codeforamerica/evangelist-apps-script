@@ -14,7 +14,7 @@ const {
 const {
   importInternalSalesforceToDirectory,
   importExternalSalesforceToDirectory,
-} = require('./BrigadeDatabase.js');
+} = require('./BrigadeDirectory.js');
 const {
   meetupProSyncMembersIncremental,
   meetupProSyncMembersAll,
