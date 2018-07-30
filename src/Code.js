@@ -88,8 +88,8 @@ function loadMeetupData() {
  *    and click the "Authorize" link that appears in the spreadsheet.
  */
 const SALESFORCE_HEADERS = [
-  'Name', 'Salesforce Account ID', 'Active?', 'Website URL', 'Meetup Link', 'Meetup User ID', 'Location',
-  'Twitter', 'Github URL', 'Facebook Page URL', 'Primary Contact', 'Primary Contact Email',
+  'Brigade Name', 'Salesforce Account ID', 'Active?', 'Website', 'Meetup URL', 'Meetup User ID', 'Location',
+  'Twitter', 'GitHub URL', 'Facebook Page URL', 'Primary Contact', 'Primary Contact Email',
   'Public Contact Email',
 ];
 const PARTNER_BRIGADES = [ // grandfather these in for now

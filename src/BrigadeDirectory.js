@@ -11,12 +11,12 @@ const DATABASE_AUTO_SHEET_NAME = 'Brigade Contact Info';
 // check fields for equality
 const FIELDS = [
   // salesforce column name, database column name
-  ['Name', 'Brigade Name'],
-  ['Website URL', 'Website'],
-  ['Meetup Link', 'Meetup URL'],
+  ['Brigade Name', 'Brigade Name'],
+  ['Website', 'Website'],
+  ['Meetup URL', 'Meetup URL'],
   ['Twitter', 'Twitter'],
   ['Facebook Page URL', 'Facebook Page URL'],
-  ['Github URL', 'GitHub URL'],
+  ['GitHub URL', 'GitHub URL'],
 ];
 
 function importSalesforceToDirectory(isInternal) {
@@ -85,17 +85,17 @@ function importSalesforceToDirectory(isInternal) {
     }
 
     const brigadeObject = {
-      'Brigade Name': brigade[salesforceHeaders.indexOf('Name')],
+      'Brigade Name': brigade[salesforceHeaders.indexOf('Brigade Name')],
       City: brigade[salesforceHeaders.indexOf('Location')].split(', ')[0],
       State: brigade[salesforceHeaders.indexOf('Location')].split(', ')[1],
       'Primary Contact Name': brigade[salesforceHeaders.indexOf('Primary Contact')],
       'Primary Contact Email': primaryContactEmail,
       'Public Contact Email': primaryContactEmail,
-      Website: brigade[salesforceHeaders.indexOf('Website URL')],
+      Website: brigade[salesforceHeaders.indexOf('Website')],
       Twitter: brigade[salesforceHeaders.indexOf('Twitter')],
       'Facebook Page URL': brigade[salesforceHeaders.indexOf('Facebook Page URL')],
-      'GitHub URL': brigade[salesforceHeaders.indexOf('Github URL')],
-      'Meetup URL': brigade[salesforceHeaders.indexOf('Meetup Link')],
+      'GitHub URL': brigade[salesforceHeaders.indexOf('GitHub URL')],
+      'Meetup URL': brigade[salesforceHeaders.indexOf('Meetup URL')],
       'Salesforce Account ID': brigade[salesforceHeaders.indexOf('Salesforce Account ID')],
     };
 
