@@ -9,7 +9,7 @@ const DATABASE_AUTO_SHEET_NAME = 'Brigade Contact Info';
 
 class Brigade {
   constructor(
-    name, isActive, city, state, primaryContactName, primaryContactEmail,
+    name, isActive, city, state, region, primaryContactName, primaryContactEmail,
     publicContactEmail, website, twitter, facebookPageUrl, githubUrl,
     meetupUrl, salesforceAccountId,
   ) {
@@ -17,6 +17,7 @@ class Brigade {
     this.isActive = isActive;
     this.city = city;
     this.state = state;
+    this.region = region;
     this.primaryContactName = primaryContactName;
     this.primaryContactEmail = primaryContactEmail;
     this.publicContactEmail = publicContactEmail;
@@ -30,13 +31,13 @@ class Brigade {
 
   static fromObject(object) {
     const {
-      name, isActive, city, state, primaryContactName, primaryContactEmail,
+      name, isActive, city, state, region, primaryContactName, primaryContactEmail,
       publicContactEmail, website, twitter, facebookPageUrl, githubUrl,
       meetupUrl, salesforceAccountId,
     } = object;
 
     return new Brigade(
-      name, isActive, city, state, primaryContactName, primaryContactEmail,
+      name, isActive, city, state, region, primaryContactName, primaryContactEmail,
       publicContactEmail, website, twitter, facebookPageUrl, githubUrl,
       meetupUrl, salesforceAccountId,
     );
@@ -60,6 +61,7 @@ class BrigadeList {
       row[salesforceHeaders.indexOf('Active?')],
       row[salesforceHeaders.indexOf('Location')].split(', ')[0], // city
       row[salesforceHeaders.indexOf('Location')].split(', ')[1], // state
+      row[salesforceHeaders.indexOf('Region')],
       row[salesforceHeaders.indexOf('Primary Contact')],
       row[salesforceHeaders.indexOf('Primary Contact Email')],
       row[salesforceHeaders.indexOf('Public Contact Email')],
@@ -84,6 +86,7 @@ class BrigadeDirectory {
       'Brigade Name': b => b.name,
       City: b => b.city,
       State: b => b.state,
+      Region: b => b.region,
       'Primary Contact Name': b => b.primaryContactName,
       [[(this.isInternal ? 'Primary Contact Email' : 'Public Contact Email')]]:
       (b) => {

@@ -106,6 +106,7 @@ const SALESFORCE_HEADERS = [
   ['Meetup URL', b => b.MeetUp_Link__c],
   ['Meetup User ID', b => b.MeetUp_Group_ID__c],
   ['Location', b => b.Brigade_Location__c],
+  ['Region', b => b.Brigade_Region__c],
   ['Twitter', b => b.Organization_Twitter__c],
   ['GitHub URL', b => b.Github_URL__c],
   ['Facebook Page URL', b => b.Facebook_Page_URL__c],
