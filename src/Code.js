@@ -1,3 +1,4 @@
+const { BrigadeList } = require('./BrigadeDirectory');
 const {
   salesforceListBrigades,
   salesforceListDonations,
@@ -87,41 +88,36 @@ function loadMeetupData() {
  * 4. Run the "salesforceAuthorize" function in the "Salesforce.gs" script
  *    and click the "Authorize" link that appears in the spreadsheet.
  */
-const SALESFORCE_HEADERS = [
-  'Brigade Name', 'Salesforce Account ID', 'Active?', 'Website', 'Meetup URL', 'Meetup User ID', 'Location',
-  'Twitter', 'GitHub URL', 'Facebook Page URL', 'Primary Contact', 'Primary Contact Email',
-  'Public Contact Email',
-];
 const PARTNER_BRIGADES = [ // grandfather these in for now
-  'Code for Greensboro', 'Code for Kansas City', 'Code for Newark', 'Northern Illinois University - Tech Bark (Brigade)', 'Open Austin', 'Sketch City (Houston)',
+  'Code for Greensboro', 'Code for Kansas City', 'Code for Newark',
+  'Northern Illinois University - Tech Bark (Brigade)', 'Open Austin',
+  'Sketch City (Houston)',
 ];
+/* eslint-disable quote-props */
+const SALESFORCE_HEADERS = [
+  ['Brigade Name', b => b.Name],
+  ['Salesforce Account ID', b => b.Id],
+  ['Active?', b => b.Brigade_Type__c === 'Brigade' && (
+    b.Brigade_Status__c === 'Active' ||
+    (b.Brigade_Status__c === 'MOU in Process' && PARTNER_BRIGADES.indexOf(b.Name) !== -1) || // Only allow partner brigades in progress
+    b.Brigade_Status__c === 'Signed MOU' // TODO: Remove once the MOU signing process is over
+  )],
+  ['Website', b => b.Website || b.Site_Link__c],
+  ['Meetup URL', b => b.MeetUp_Link__c],
+  ['Meetup User ID', b => b.MeetUp_Group_ID__c],
+  ['Location', b => b.Brigade_Location__c],
+  ['Twitter', b => b.Organization_Twitter__c],
+  ['GitHub URL', b => b.Github_URL__c],
+  ['Facebook Page URL', b => b.Facebook_Page_URL__c],
+  ['Primary Contact', b => b.npe01__One2OneContact__r && b.npe01__One2OneContact__r.Name],
+  ['Primary Contact Email', b => b.npe01__One2OneContact__r && b.npe01__One2OneContact__r.Email],
+  ['Public Contact Email', b => b.Brigade_Public_Email__c],
+];
+/* eslint-enable quote-props */
 function loadSalesforceData() {
   const salesforceBrigades = salesforceListBrigades();
-  const brigades = [];
-
-  salesforceBrigades.forEach((brigade) => {
-    const isActiveBrigade = brigade.Brigade_Type__c === 'Brigade' && (
-      brigade.Brigade_Status__c === 'Active' ||
-       (brigade.Brigade_Status__c === 'MOU in Process' && PARTNER_BRIGADES.indexOf(brigade.Name) !== -1) || // Only allow partner brigades in progress
-       brigade.Brigade_Status__c === 'Signed MOU' // TODO: Remove once the MOU signing process is over
-    );
-
-    brigades.push([
-      brigade.Name,
-      brigade.Id,
-      isActiveBrigade,
-      brigade.Website || brigade.Site_Link__c,
-      brigade.MeetUp_Link__c,
-      brigade.MeetUp_Group_ID__c,
-      brigade.Brigade_Location__c,
-      brigade.Organization_Twitter__c,
-      brigade.Github_URL__c,
-      brigade.Facebook_Page_URL__c,
-      brigade.npe01__One2OneContact__r && brigade.npe01__One2OneContact__r.Name,
-      brigade.npe01__One2OneContact__r && brigade.npe01__One2OneContact__r.Email,
-      brigade.Brigade_Public_Email__c,
-    ]);
-  });
+  const brigades =
+    salesforceBrigades.map(brigade => SALESFORCE_HEADERS.map(([_, fn]) => fn(brigade)));
 
   const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
 
@@ -138,7 +134,7 @@ function loadSalesforceData() {
     .clear()
     .getRange(1, 1, 1, SALESFORCE_HEADERS.length)
     .setFontWeight('bold')
-    .setValues([SALESFORCE_HEADERS])
+    .setValues([SALESFORCE_HEADERS.map(([name, _]) => name)])
     .getSheet()
     .getRange(2, 1, brigades.length, SALESFORCE_HEADERS.length)
     .setValues(brigades);
@@ -280,19 +276,18 @@ that the "email is invalid".
 const MANUAL_OVERRIDE_ADD_MEMBER = [
   'captains@codefortulsa.org',
 ];
-function loadGroupMembers(brigadeResults) {
-  const brigades = brigadeResults || loadSalesforceData();
+function loadGroupMembers() {
+  const { brigades } = BrigadeList.fromSalesforceSheet(SpreadsheetApp
+    .getActive().getSheetByName(SHEET_NAMES.salesforce)
+    .getDataRange().getValues());
   const group = GroupsApp.getGroupByEmail('brigadeleads@codeforamerica.org');
 
   // First, populate a list of emails to check
-  const activeColumn = SALESFORCE_HEADERS.indexOf('Active?');
-  const primaryContactEmail = SALESFORCE_HEADERS.indexOf('Primary Contact Email');
   const emails = [];
-  brigades.forEach((brigade) => {
-    if (brigade && brigade[activeColumn]) { // remove missing primary contact & inactive
-      emails.push(brigade[primaryContactEmail]);
-    }
-  });
+  brigades
+    .filter(b => b.isActive) // remove missing primary contact & inactive
+    .filter(b => b.primaryContactEmail)
+    .forEach(b => emails.push(b.primaryContactEmail));
 
   // ... add in any emails for co-captains that aren't the primary contact:
   const [
@@ -422,8 +417,8 @@ function loadAll() {
   createUI();
   loadBrigadeInformation();
   loadMeetupData();
-  const brigades = loadSalesforceData();
-  loadGroupMembers(brigades);
+  loadSalesforceData();
+  loadGroupMembers();
 }
 
 module.exports = {
