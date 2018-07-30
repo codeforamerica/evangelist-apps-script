@@ -96,7 +96,7 @@ function importSalesforceToDirectory(isInternal) {
       'Facebook Page URL': brigade[salesforceHeaders.indexOf('Facebook Page URL')],
       'GitHub URL': brigade[salesforceHeaders.indexOf('Github URL')],
       'Meetup URL': brigade[salesforceHeaders.indexOf('Meetup Link')],
-      'Salesforce Account ID': brigade[salesforceHeaders.indexOf('Salesforce ID')],
+      'Salesforce Account ID': brigade[salesforceHeaders.indexOf('Salesforce Account ID')],
     };
 
     brigadesToAdd.push(HEADERS.map(header => brigadeObject[header] || ''));
@@ -128,9 +128,9 @@ function compareDatabaseAndSalesforce() {
 
   databaseContents.forEach((brigade) => {
     // attempt to find the brigade in the salesforce list
-    //   by matching the Salesforce ID
+    //   by matching the Salesforce Account ID
     const brigadeInSalesforce = find(salesforceContents, (b) => {
-      const salesforceId = b[salesforceHeaders.indexOf('Salesforce ID')];
+      const salesforceId = b[salesforceHeaders.indexOf('Salesforce Account ID')];
       const databaseId = brigade[databaseHeaders.indexOf('Salesforce Account ID')];
       const salesforceName = b[salesforceHeaders.indexOf('Name')];
       const databaseName = brigade[databaseHeaders.indexOf('Brigade Name')];
@@ -186,7 +186,7 @@ function compareDatabaseAndSalesforce() {
 
     let brigadeInDatabase = null;
     databaseContents.forEach((b) => {
-      const salesforceId = brigade[salesforceHeaders.indexOf('Salesforce ID')];
+      const salesforceId = brigade[salesforceHeaders.indexOf('Salesforce Account ID')];
       const databaseId = b[databaseHeaders.indexOf('Salesforce Account ID')];
       const salesforceName = brigade[salesforceHeaders.indexOf('Name')];
       const databaseName = b[databaseHeaders.indexOf('Brigade Name')];

@@ -59,7 +59,7 @@ const BRIGADES_BY_MEETUP_ID = (function loadBrigadesByMeetupId() {
     .getValues();
 
   return salesforceData.reduce((a, row) => {
-    const salesforceId = row[salesforceHeaders.indexOf('Salesforce ID')];
+    const salesforceId = row[salesforceHeaders.indexOf('Salesforce Account ID')];
     const meetupUserId = row[salesforceHeaders.indexOf('Meetup User ID')];
     if (!meetupUserId) {
       return a;

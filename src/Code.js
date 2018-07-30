@@ -88,7 +88,7 @@ function loadMeetupData() {
  *    and click the "Authorize" link that appears in the spreadsheet.
  */
 const SALESFORCE_HEADERS = [
-  'Name', 'Salesforce ID', 'Active?', 'Website URL', 'Meetup Link', 'Meetup User ID', 'Location',
+  'Name', 'Salesforce Account ID', 'Active?', 'Website URL', 'Meetup Link', 'Meetup User ID', 'Location',
   'Twitter', 'Github URL', 'Facebook Page URL', 'Primary Contact', 'Primary Contact Email',
   'Public Contact Email',
 ];
