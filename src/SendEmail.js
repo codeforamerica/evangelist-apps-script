@@ -3,13 +3,18 @@ const {
   loadAll,
 } = require('./Code.js');
 const {
+  BrigadeList,
   databaseTestBrigadeURLs,
 } = require('./BrigadeDirectory.js');
 
 // eslint-di
 function sendEmail() {
   loadAll();
-  databaseTestBrigadeURLs();
+
+  // test brigade URLs
+  const salesforceSheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
+  const brigadeList = BrigadeList.fromSalesforceSheet(salesforceSheet.getDataRange().getValues());
+  databaseTestBrigadeURLs(brigadeList);
 
   const contents = SpreadsheetApp
     .getActive()
