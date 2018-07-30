@@ -11,7 +11,7 @@ class Brigade {
   constructor(
     name, isActive, city, state, primaryContactName, primaryContactEmail,
     publicContactEmail, website, twitter, facebookPageUrl, githubUrl,
-    meetupUrl, saleforceAccountId,
+    meetupUrl, salesforceAccountId,
   ) {
     this.name = name;
     this.isActive = isActive;
@@ -25,7 +25,21 @@ class Brigade {
     this.facebookPageUrl = facebookPageUrl;
     this.githubUrl = githubUrl;
     this.meetupUrl = meetupUrl;
-    this.saleforceAccountId = saleforceAccountId;
+    this.salesforceAccountId = salesforceAccountId;
+  }
+
+  static fromObject(object) {
+    const {
+      name, isActive, city, state, primaryContactName, primaryContactEmail,
+      publicContactEmail, website, twitter, facebookPageUrl, githubUrl,
+      meetupUrl, salesforceAccountId,
+    } = object;
+
+    return new Brigade(
+      name, isActive, city, state, primaryContactName, primaryContactEmail,
+      publicContactEmail, website, twitter, facebookPageUrl, githubUrl,
+      meetupUrl, salesforceAccountId,
+    );
   }
 }
 
@@ -174,6 +188,8 @@ function databaseTestBrigadeURLs(brigadeList) {
 }
 
 module.exports = {
+  Brigade,
+  BrigadeDirectory,
   BrigadeList,
   databaseTestBrigadeURLs,
   importExternalSalesforceToDirectory,
