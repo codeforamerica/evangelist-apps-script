@@ -10,5 +10,8 @@ module.exports = {
   },
   "rules": {
     "no-console": 0, // console.log is our best logging method
+    "no-unused-vars": [
+      "error", { argsIgnorePattern: '^_$' }
+    ]
   }
 };
