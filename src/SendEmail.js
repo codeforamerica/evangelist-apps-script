@@ -3,14 +3,12 @@ const {
   loadAll,
 } = require('./Code.js');
 const {
-  compareDatabaseAndSalesforce,
   databaseTestBrigadeURLs,
 } = require('./BrigadeDirectory.js');
 
 // eslint-di
 function sendEmail() {
   loadAll();
-  compareDatabaseAndSalesforce();
   databaseTestBrigadeURLs();
 
   const contents = SpreadsheetApp
