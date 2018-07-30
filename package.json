@@ -26,6 +26,6 @@
   "scripts": {
     "build": "webpack",
     "lint": "eslint src webpack.config.js",
-    "test": "webpack -p"
+    "test": "webpack -p && jasmine"
   }
 }
