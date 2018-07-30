@@ -1,3 +1,4 @@
+const values = require('core-js/library/fn/object/values');
 const find = require('core-js/library/fn/array/find');
 const {
   SHEET_NAMES,
@@ -7,6 +8,57 @@ const DATABASE_DOC_ID = '1zglhAKDUNnvKindAhb6K_DJaLQ_myRYGKvE2DTYolAQ';
 const DATABASE_INTERNAL_DOC_ID = '12o5V69MMiYO6sls5V4FLN1_gtgquVlr3mzrncHvQZzI';
 const DATABASE_SHEET_NAME = 'Brigade Contact Info';
 const DATABASE_AUTO_SHEET_NAME = 'Brigade Contact Info';
+
+class Brigade {
+  constructor(
+    name, isActive, city, state, primaryContactName, primaryContactEmail,
+    publicContactEmail, website, twitter, facebookPageUrl, githubUrl,
+    meetupUrl, saleforceAccountId,
+  ) {
+    this.name = name;
+    this.isActive = isActive;
+    this.city = city;
+    this.state = state;
+    this.primaryContactName = primaryContactName;
+    this.primaryContactEmail = primaryContactEmail;
+    this.publicContactEmail = publicContactEmail;
+    this.website = website;
+    this.twitter = twitter;
+    this.facebookPageUrl = facebookPageUrl;
+    this.githubUrl = githubUrl;
+    this.meetupUrl = meetupUrl;
+    this.saleforceAccountId = saleforceAccountId;
+  }
+}
+
+class BrigadeList {
+  constructor(brigades) {
+    this.brigades = brigades;
+  }
+
+  /*
+   * @param {Array} salesforceSheet A 2-dimensional array that represents the
+   * "AUTO:salesforce" sheet's contents.
+   */
+  static fromSalesforceSheet(salesforceSheet) {
+    const [salesforceHeaders, ...salesforceContents] = salesforceSheet;
+
+    return new BrigadeList(salesforceContents.map(row => new Brigade(
+      row[salesforceHeaders.indexOf('Brigade Name')],
+      row[salesforceHeaders.indexOf('Active?')],
+      row[salesforceHeaders.indexOf('Location')].split(', ')[0], // city
+      row[salesforceHeaders.indexOf('Location')].split(', ')[1], // state
+      row[salesforceHeaders.indexOf('Primary Contact')],
+      row[salesforceHeaders.indexOf('Primary Contact Email')],
+      row[salesforceHeaders.indexOf('Website')],
+      row[salesforceHeaders.indexOf('Twitter')],
+      row[salesforceHeaders.indexOf('Facebook Page URL')],
+      row[salesforceHeaders.indexOf('GitHub URL')],
+      row[salesforceHeaders.indexOf('Meetup URL')],
+      row[salesforceHeaders.indexOf('Salesforce Account ID')],
+    )));
+  }
+}
 
 // check fields for equality
 const FIELDS = [
@@ -20,23 +72,32 @@ const FIELDS = [
 ];
 
 function importSalesforceToDirectory(isInternal) {
-  const HEADERS = [
-    'Brigade Name',
-    'City',
-    'State',
-    'Primary Contact Name',
-    (isInternal ? 'Primary Contact Email' : 'Public Contact Email'),
-    'Website',
-    'Twitter',
-    'Facebook Page URL',
-    'GitHub URL',
-    'Meetup URL',
+  const HEADERS = {
+    'Brigade Name': b => b.name,
+    City: b => b.city,
+    State: b => b.state,
+    'Primary Contact Name': b => b.primaryContactName,
+    [[(isInternal ? 'Primary Contact Email' : 'Public Contact Email')]]:
+      (b) => {
+        // if the brigade has given us an explicit public email address, use that
+        // instead of the primary contact in salesforce.
+        if (b.publicContactEmail && !isInternal) {
+          return b.publicContactEmail;
+        }
+
+        return b.primaryContactEmail;
+      },
+    Website: b => b.website,
+    Twitter: b => b.twitter,
+    'Facebook Page URL': b => b.facebookPageUrl,
+    'GitHub URL': b => b.githubUrl,
+    'Meetup URL': b => b.meetupUrl,
     // 'Slack Invite URL',
     // 'Active Project Categories',
     // 'Meeting Time(s)',
     // 'Meeting Location',
-    'Salesforce Account ID',
-  ];
+    'Salesforce Account ID': b => b.salesforceAccountId,
+  };
 
   const database = SpreadsheetApp
     .openById(isInternal ? DATABASE_INTERNAL_DOC_ID : DATABASE_DOC_ID)
@@ -57,52 +118,29 @@ function importSalesforceToDirectory(isInternal) {
       'See "Instructions" Tab For Editing Instructions',
     ]]);
   }
-  database.getRange(2, 1, 1, HEADERS.length)
-    .setValues([HEADERS])
+  database.getRange(2, 1, 1, Object.keys(HEADERS).length)
+    .setValues([Object.keys(HEADERS)])
     .setFontWeight('bold');
   database.setFrozenRows(2);
   database.setFrozenColumns(1);
 
-  const salesforce = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
-  const salesforceContents = salesforce.getDataRange().getValues();
-  const salesforceHeaders = salesforceContents.shift();
+  const salesforceSheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce);
+  const salesforceBrigades =
+    BrigadeList.fromSalesforceSheet(salesforceSheet.getDataRange().getValues());
 
   const brigadesToAdd = [];
 
-  salesforceContents.forEach((brigade) => {
-    const isActive = brigade[salesforceHeaders.indexOf('Active?')];
-    if (!isActive) {
+  salesforceBrigades.brigades.forEach((brigade) => {
+    if (!brigade.isActive) {
       return;
     }
 
-    let primaryContactEmail;
-    // if the brigade has given us an explicit public email address, use that (with no "name")
-    //   instead of the primary contact in salesforce.
-    if (brigade[salesforceHeaders.indexOf('Public Contact Email')] && !isInternal) {
-      primaryContactEmail = brigade[salesforceHeaders.indexOf('Public Contact Email')];
-    } else {
-      primaryContactEmail = brigade[salesforceHeaders.indexOf('Primary Contact Email')];
-    }
-
-    const brigadeObject = {
-      'Brigade Name': brigade[salesforceHeaders.indexOf('Brigade Name')],
-      City: brigade[salesforceHeaders.indexOf('Location')].split(', ')[0],
-      State: brigade[salesforceHeaders.indexOf('Location')].split(', ')[1],
-      'Primary Contact Name': brigade[salesforceHeaders.indexOf('Primary Contact')],
-      'Primary Contact Email': primaryContactEmail,
-      'Public Contact Email': primaryContactEmail,
-      Website: brigade[salesforceHeaders.indexOf('Website')],
-      Twitter: brigade[salesforceHeaders.indexOf('Twitter')],
-      'Facebook Page URL': brigade[salesforceHeaders.indexOf('Facebook Page URL')],
-      'GitHub URL': brigade[salesforceHeaders.indexOf('GitHub URL')],
-      'Meetup URL': brigade[salesforceHeaders.indexOf('Meetup URL')],
-      'Salesforce Account ID': brigade[salesforceHeaders.indexOf('Salesforce Account ID')],
-    };
-
-    brigadesToAdd.push(HEADERS.map(header => brigadeObject[header] || ''));
+    brigadesToAdd.push(values(HEADERS).map(fn => fn(brigade) || ''));
   });
 
-  database.getRange(3, 1, brigadesToAdd.length, HEADERS.length).setValues(brigadesToAdd);
+  database
+    .getRange(3, 1, brigadesToAdd.length, Object.keys(HEADERS).length)
+    .setValues(brigadesToAdd);
 }
 
 function importExternalSalesforceToDirectory() {
