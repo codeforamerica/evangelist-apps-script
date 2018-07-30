@@ -40,9 +40,17 @@ describe('BrigadeDirectory', () => {
       expect(Object.keys(this.subject().headers())).toContain('Public Contact Email');
     });
 
+    it('excludes Salesforce Account ID', () => {
+      expect(Object.keys(this.subject().headers())).not.toContain('Salesforce Account ID');
+    });
+
     describe('for isInternal', () => {
       beforeEach(() => {
         this.isInternal = true;
+      });
+
+      it('includes Salesforce Account ID', () => {
+        expect(Object.keys(this.subject().headers())).toContain('Salesforce Account ID');
       });
 
       it('uses Primary Contact Email', () => {
@@ -53,8 +61,8 @@ describe('BrigadeDirectory', () => {
 
   describe('.brigadesToAdd', () => {
     beforeEach(() => {
-      this.headers = Object.keys(this.subject().headers());
-      this.getField = (field, b) => b[this.headers.indexOf(field)];
+      this.headers = () => Object.keys(this.subject().headers());
+      this.getField = (field, b) => b[this.headers().indexOf(field)];
     });
 
     it('excludes inactive brigades', () => {
@@ -70,7 +78,19 @@ describe('BrigadeDirectory', () => {
 
       expect(this.getField('City', activeBrigade)).toEqual(VALID_BRIGADE_OPTIONS.city);
       expect(this.getField('Public Contact Email', activeBrigade)).toEqual(VALID_BRIGADE_OPTIONS.publicContactEmail);
-      expect(this.getField('Salesforce Account ID', activeBrigade)).toEqual(VALID_BRIGADE_OPTIONS.salesforceAccountId);
+    });
+
+    describe('for Internal Directory', () => {
+      beforeEach(() => {
+        this.isInternal = true;
+      });
+
+      it('converts brigade objects with internal-only headers', () => {
+        const activeBrigade = this.subject().brigadesToAdd()[0];
+
+        expect(this.getField('Salesforce Account ID', activeBrigade))
+          .toEqual(VALID_BRIGADE_OPTIONS.salesforceAccountId);
+      });
     });
   });
 });

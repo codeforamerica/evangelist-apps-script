@@ -16,7 +16,7 @@ class BrigadeDirectory {
   }
 
   headers() {
-    return {
+    const headers = {
       'Brigade Name': b => b.name,
       City: b => b.city,
       State: b => b.state,
@@ -37,8 +37,15 @@ class BrigadeDirectory {
       'Facebook Page URL': b => b.facebookPageUrl,
       'GitHub URL': b => b.githubUrl,
       'Meetup URL': b => b.meetupUrl,
-      'Salesforce Account ID': b => b.salesforceAccountId,
     };
+
+    if (this.isInternal) {
+      Object.assign(headers, {
+        'Salesforce Account ID': b => b.salesforceAccountId,
+      });
+    }
+
+    return headers;
   }
 
   brigadesToAdd() {
