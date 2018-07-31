@@ -1,3 +1,4 @@
+const { BrigadeList } = require('./Brigade');
 const { SHEET_NAMES } = require('./Code.js');
 
 const DISCOURSE_ROOT_URL = 'https://discourse.codeforamerica.org';
@@ -28,15 +29,17 @@ const discourseRequest = function discourseRequest(method, path, payload) {
 
 module.exports = {
   discourseSyncBrigadeList() {
-    const brigades =
+    const salesforceSheet =
       SpreadsheetApp
         .getActive()
         .getSheetByName(SHEET_NAMES.salesforce)
         .getDataRange()
         .getValues();
-    const headers = brigades.shift();
-    const activeColumn = headers.indexOf('Active?');
-    const nameColumn = headers.indexOf('Name');
+    const activeBrigadeNames =
+      BrigadeList
+        .fromSalesforceSheet(salesforceSheet)
+        .filter(b => b.isActive)
+        .map(b => b.name);
 
     const response = discourseRequest('PUT', '/admin/customize/user_fields/1', {
       user_field: {
@@ -47,7 +50,7 @@ module.exports = {
         required: false,
         show_on_profile: true,
         show_on_user_card: true,
-        options: brigades.filter(b => b[activeColumn]).map(b => b[nameColumn]),
+        options: activeBrigadeNames,
       },
     });
 
