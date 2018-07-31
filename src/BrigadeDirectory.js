@@ -1,3 +1,4 @@
+const assign = require('core-js/library/fn/object/assign');
 const values = require('core-js/library/fn/object/values');
 
 const {
@@ -40,7 +41,7 @@ class BrigadeDirectory {
     };
 
     if (this.isInternal) {
-      Object.assign(headers, {
+      assign(headers, {
         'Salesforce Account ID': b => b.salesforceAccountId,
       });
     }
