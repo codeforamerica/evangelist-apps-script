@@ -4,7 +4,7 @@ const values = require('core-js/library/fn/object/values');
 const {
   SHEET_NAMES,
 } = require('./Code.js');
-const { Brigade, BrigadeList } = require('./Brigade');
+const { BrigadeList } = require('./Brigade');
 
 const DATABASE_DOC_ID = '1zglhAKDUNnvKindAhb6K_DJaLQ_myRYGKvE2DTYolAQ';
 const DATABASE_INTERNAL_DOC_ID = '12o5V69MMiYO6sls5V4FLN1_gtgquVlr3mzrncHvQZzI';
@@ -133,9 +133,7 @@ function databaseTestBrigadeURLs(brigadeList) {
 }
 
 module.exports = {
-  Brigade,
   BrigadeDirectory,
-  BrigadeList,
   databaseTestBrigadeURLs,
   importExternalSalesforceToDirectory,
   importInternalSalesforceToDirectory,

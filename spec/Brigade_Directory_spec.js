@@ -1,4 +1,5 @@
-const { BrigadeDirectory, Brigade, BrigadeList } = require('../src/BrigadeDirectory');
+const { BrigadeDirectory } = require('../src/BrigadeDirectory');
+const { Brigade, BrigadeList } = require('../src/Brigade');
 
 const VALID_BRIGADE_OPTIONS = {
   name: 'Open Oakland',
