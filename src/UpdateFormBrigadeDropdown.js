@@ -14,7 +14,7 @@ class UpdateFormBrigadeDropdown {
 
     return BrigadeList.fromSalesforceSheet(salesforceSheet)
       .brigades
-      .filter(b => b.isActitve)
+      .filter(b => b.isActive)
       .map(b => b.name);
   }
 
