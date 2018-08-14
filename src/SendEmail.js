@@ -1,9 +1,6 @@
-const { SHEET_NAMES } = require('./Code.js');
+const { BrigadeList } = require('./Brigade');
+const { SHEET_NAMES, loadAll } = require('./Code.js');
 const {
-  loadAll,
-} = require('./Code.js');
-const {
-  BrigadeList,
   databaseTestBrigadeURLs,
 } = require('./BrigadeDirectory.js');
 
