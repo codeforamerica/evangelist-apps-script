@@ -24,7 +24,8 @@ function loadBrigadeInformation() {
   info.forEach((brigade) => {
     // filter to only the official CfA Brigades
     if (brigade.tags.indexOf('Code for America') === -1 ||
-        brigade.tags.indexOf('Brigade') === -1) {
+        brigade.tags.indexOf('Brigade') === -1 ||
+        brigade.tags.indexOf('Official') === -1) {
       return;
     }
 
