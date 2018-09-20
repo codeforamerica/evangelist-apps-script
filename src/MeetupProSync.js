@@ -1,7 +1,6 @@
 const {
   SHEET_NAMES,
 } = require('./Code.js');
-const { convertMeetupTime } = require('./meetup/MeetupUtil');
 const MeetupClient = require('./meetup/MeetupClient');
 
 /*
@@ -85,7 +84,6 @@ function meetupProSyncMembersAll() {
 
 module.exports = {
   MEETUP_MEMBERSHIP_SPREADSHEET_ID,
-  convertMeetupTime,
   meetupProSyncMembersAll,
   meetupProSyncMembersIncremental,
 };

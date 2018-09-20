@@ -1,4 +1,5 @@
 // TODO: figure out why "default" is required here
+const { convertMeetupTime } = require('./meetup/MeetupUtil');
 const {
   salesforceListBrigadeAffiliations,
   salesforceListBrigades,
@@ -8,7 +9,6 @@ const SalesforceClient = require('./salesforce/SalesforceClient');
 const fullNameSplitter = require('full-name-splitter').default;
 
 const {
-  convertMeetupTime,
   MEETUP_MEMBERSHIP_SPREADSHEET_ID,
 } = require('./MeetupProSync.js');
 const {
@@ -78,7 +78,7 @@ const MEETUP_TO_SALESFORCE_CONTACTS_HEADERS = [
   'Meetup_User_ID__c', 'FirstName', 'LastName', 'Email', 'MC_Brigade_Newsletter__c', 'Program_Interest_Brigade__c', 'Data_Source__c',
 ];
 const MEETUP_TO_SALESFORCE_CONTACTS_UPSERT_HEADERS = [
-  'Email', 'Meetup_User_ID__c', 'MC_Brigade_Newsletter__c', 'Program_Interest_Brigade__c',
+  'Email', 'Meetup_User_ID__c', 'MC_Brigade_Newsletter__c', 'Program_Interest_Brigade__c', 'Meetup_Last_Access_Date__c',
 ];
 const MEETUP_TO_SALESFORCE_AFFILIATIONS_TO_UPDATE_HEADERS = [
   'Id', 'npe5__Contact__r.Meetup_User_ID__c', 'npe5__Organization__c', 'npe5__StartDate__c', 'npe5__EndDate__c', 'Source__c',
@@ -123,6 +123,7 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
         member[meetupMembersHeaders.indexOf('Meetup ID')],
         'TRUE',
         'TRUE',
+        convertMeetupTime(member[meetupMembersHeaders.indexOf('Last Access Time')]),
       ]);
 
       const meetupMemberBrigades = JSON.parse(member[meetupMembersHeaders.indexOf('Chapters')]);
