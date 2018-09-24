@@ -1,8 +1,8 @@
-const { SHEET_NAMES } = require('./Code.js');
 const {
-  convertMeetupTime,
   MEETUP_MEMBERSHIP_SPREADSHEET_ID,
 } = require('./MeetupProSync.js');
+const { SHEET_NAMES } = require('./Code.js');
+const { convertMeetupTime } = require('./meetup/MeetupUtil');
 
 /*
  * Code related to syndicating the results into Brigade-specific external sheets.
