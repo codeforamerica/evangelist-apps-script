@@ -91,7 +91,7 @@ function loadMeetupData() {
  */
 const PARTNER_BRIGADES = [ // grandfather these in for now
   'Code for Greensboro', 'Code for Kansas City', 'Code for Newark',
-  'Northern Illinois University - Tech Bark (Brigade)', 'Open Austin',
+  'Northern Illinois University (Tech Bark)', 'Open Austin',
   'Sketch City (Houston)',
 ];
 /* eslint-disable quote-props */
