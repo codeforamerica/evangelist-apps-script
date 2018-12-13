@@ -375,7 +375,7 @@ function createTriggers() {
 
   // sync past/upcoming events for all our brigades
   ScriptApp.newTrigger('meetupProSyncEvents')
-    .timeBased().everyDays(1).atHour(24)
+    .timeBased().everyDays(1).atHour(0)
     .create(); // 12am
 
   // send the overview email
