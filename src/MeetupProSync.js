@@ -3,6 +3,9 @@ const {
 } = require('./Code.js');
 const MeetupClient = require('./meetup/MeetupClient');
 
+
+const THREE_MONTHS_IN_MS = 3 * 30 * 24 * 60 * 60 * 1000;
+
 /*
  * Due to Google Sheet's 2 million cell limit, we need to separate this into its own
  * spreadsheet. (It also helps with performance.)
@@ -82,8 +85,53 @@ function meetupProSyncMembersAll() {
   meetupProSyncMembers(false);
 }
 
+function meetupProSyncEvents() {
+  const client = new MeetupClient();
+  const groups = client.meetupRequest('https://api.meetup.com/pro/brigade/groups?only=id,name,urlname').fetchAllPages();
+
+
+  const eventsHeaders = [
+    // [header name, function that gets value based on event object]
+    ['Event ID', e => e.id],
+    ['Name', e => e.name],
+    ['Status', e => e.status],
+    ['Date', e => e.local_date],
+    ['Time', e => e.local_time],
+    ['Timezone', e => e.group.timezone],
+    ['Yes RSVPs', e => e.yes_rsvp_count],
+    ['Link', e => e.link],
+    ['Meetup Group ID', e => e.group.id],
+    ['Meetup Group Name', e => e.group.name],
+    ['Meetup Group Urlname', e => e.group.urlname],
+  ];
+  const events = [];
+  const threeMonthsFromNow = new Date((new Date()).getTime() + THREE_MONTHS_IN_MS)
+    .toISOString()
+    .replace('Z', ''); // meetup can't handle the 'Z'
+
+  /*
+   * TODO: Use /batch endpoint so this doesn't make serial requests?
+   */
+  groups.forEach((group) => {
+    events.push(...client.meetupRequest(`https://api.meetup.com/${group.urlname}/events?no_later_than=${threeMonthsFromNow}&scroll=recent_past&only=id,name,status,local_date,local_time,yes_rsvp_count,link,group`).body());
+  });
+
+  const eventsToAdd = events.map(e => eventsHeaders.map(([_, fn]) => fn(e)));
+
+  SpreadsheetApp
+    .getActive()
+    .getSheetByName(SHEET_NAMES.meetupEvents)
+    .clear()
+    .getRange(1, 1, 1, eventsHeaders.length)
+    .setValues([eventsHeaders.map(([header, _]) => header)])
+    .getSheet()
+    .getRange(2, 1, events.length, eventsHeaders.length)
+    .setValues(eventsToAdd);
+}
+
 module.exports = {
   MEETUP_MEMBERSHIP_SPREADSHEET_ID,
   meetupProSyncMembersAll,
   meetupProSyncMembersIncremental,
+  meetupProSyncEvents,
 };

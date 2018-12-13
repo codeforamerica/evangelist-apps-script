@@ -43,7 +43,7 @@ class MeetupClient {
     }
 
     if (!success) {
-      throw new Error('  Error fetching Meetup members. Retried 3 times to no avail.');
+      throw new Error('  Error fetching Meetup. Retried 3 times to no avail.');
     }
 
     const headers = response.getAllHeaders();

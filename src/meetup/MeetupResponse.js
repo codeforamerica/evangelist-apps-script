@@ -24,6 +24,20 @@ class MeetupResponse {
 
     return this.client.meetupRequest(this.links.next);
   }
+
+  fetchAllPages() {
+    const results = [];
+
+    do {
+      if (!Array.isArray(this.body())) {
+        throw new Error('fetchAllPages got a response that is not an array!');
+      }
+
+      results.push(...this.body());
+    } while (this.hasNextPage());
+
+    return results;
+  }
 }
 
 module.exports = MeetupResponse;

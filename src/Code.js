@@ -41,42 +41,6 @@ function loadBrigadeInformation() {
 
 
 /*
-* Import events from Meetup
-*/
-const SEVENTY_YEARS_IN_DAYS = 25569; // DATEVALUE("1970/1/1")
-function loadMeetupData() {
-  let pageUrl = 'http://api.codeforamerica.org/api/events/upcoming_events?per_page=200';
-  const eventsToAppend = [];
-
-  while (pageUrl) {
-    const eventResponse = JSON.parse(UrlFetchApp.fetch(pageUrl));
-    const events = eventResponse.objects;
-
-    events.forEach((event) => {
-      const start = event.start_time;
-      const startParsed = (Date.parse(`${start.substring(0, 10)}T${start.substring(11, 19)}${start.substring(20, 25)}`)
-        / 1000 / 86400.0) + SEVENTY_YEARS_IN_DAYS;
-
-      eventsToAppend.push([
-        event.organization_name,
-        event.name,
-        event.start_time,
-        startParsed,
-        event.rsvps,
-      ]);
-    });
-
-    pageUrl = eventResponse.pages.next;
-  }
-
-  const sheet = SpreadsheetApp.getActive()
-    .getSheetByName(SHEET_NAMES.meetupEvents);
-  sheet.clear();
-  const range = sheet.getRange(1, 1, eventsToAppend.length, eventsToAppend[0].length);
-  range.setValues(eventsToAppend);
-}
-
-/*
  * To set up Salesforce sync, take the following steps:
  * 1. Sign up for a Developer Edition account
  * 2. Create a "Connected App" with the Callback URL set to
@@ -356,7 +320,7 @@ function createUI() {
       .addItem('Auth Salesforce', 'salesforceAuthorize')
       .addItem('Update Salesforce Data', 'loadSalesforceData')
       .addItem('Update brigade-information', 'loadBrigadeInformation')
-      .addItem('Update Meetup Data', 'loadMeetupData')
+      .addItem('Update Meetup Data', 'meetupProSyncEvents')
       .addItem('Update brigadeleads@', 'loadGroupMembers')
       .addSeparator()
       .addItem('Send Email Update', 'sendEmail')
@@ -409,6 +373,11 @@ function createTriggers() {
     .timeBased().everyDays(1).atHour(23)
     .create(); // 11pm
 
+  // sync past/upcoming events for all our brigades
+  ScriptApp.newTrigger('meetupProSyncEvents')
+    .timeBased().everyDays(1).atHour(24)
+    .create(); // 12am
+
   // send the overview email
   ScriptApp.newTrigger('sendEmail')
     .timeBased().onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(7)
@@ -418,7 +387,6 @@ function createTriggers() {
 function loadAll() {
   createUI();
   loadBrigadeInformation();
-  loadMeetupData();
   loadSalesforceData();
   loadGroupMembers();
 }

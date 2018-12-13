@@ -16,9 +16,10 @@ const {
   importExternalSalesforceToDirectory,
 } = require('./BrigadeDirectory.js');
 const {
-  meetupProSyncMembersIncremental,
+  meetupProSyncEvents,
   meetupProSyncMembersAll,
-} = require('./MeetupProSync.js');
+  meetupProSyncMembersIncremental,
+} = require('./MeetupProSync');
 const {
   meetupToSalesforcePrepare,
   meetupToSalesforceExecute,
@@ -39,6 +40,7 @@ global.loadAll = loadAll;
 global.loadSalesforceBrigadeLeaders = loadSalesforceBrigadeLeaders;
 global.loadSalesforceData = loadSalesforceData;
 global.loadSalesforceDonationData = loadSalesforceDonationData;
+global.meetupProSyncEvents = meetupProSyncEvents;
 global.meetupProSyncMembersAll = meetupProSyncMembersAll;
 global.meetupProSyncMembersIncremental = meetupProSyncMembersIncremental;
 global.meetupToSalesforcePrepare = meetupToSalesforcePrepare;
