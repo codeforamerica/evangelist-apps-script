@@ -74,10 +74,10 @@ const BRIGADES_BY_MEETUP_ID = (function loadBrigadesByMeetupId() {
  * Populates the "Contacts to Create" / "Affiliations to Create"
  */
 const MEETUP_TO_SALESFORCE_CONTACTS_HEADERS = [
-  'Meetup_User_ID__c', 'FirstName', 'LastName', 'Email', 'MC_Brigade_Newsletter__c', 'CfA_Relationship_Types__c', 'Data_Source__c', 'Team_Ownership__c',
+  'Meetup_User_ID__c', 'FirstName', 'LastName', 'Email', 'CfA_Relationship_Types__c', 'Data_Source__c', 'Team_Ownership__c',
 ];
 const MEETUP_TO_SALESFORCE_CONTACTS_UPSERT_HEADERS = [
-  'Email', 'Meetup_User_ID__c', 'MC_Brigade_Newsletter__c', 'Meetup_Last_Access_Date__c', 'Brigade_Interest__c',
+  'Email', 'Meetup_User_ID__c', 'Meetup_Last_Access_Date__c', 'Brigade_Interest__c',
 ];
 const MEETUP_TO_SALESFORCE_AFFILIATIONS_TO_UPDATE_HEADERS = [
   'Id', 'npe5__Contact__r.Meetup_User_ID__c', 'npe5__Organization__c', 'npe5__StartDate__c', 'npe5__EndDate__c', 'Source__c',
@@ -112,7 +112,6 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
         guessedFirstAndLastName[0],
         guessedFirstAndLastName[1],
         member[meetupMembersHeaders.indexOf('Email Address')],
-        'TRUE',
         'Brigade',
         'Meetup',
         'Brigade Network',
@@ -121,7 +120,6 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
       contactsToUpsert.push([
         member[meetupMembersHeaders.indexOf('Email Address')],
         member[meetupMembersHeaders.indexOf('Meetup ID')],
-        'TRUE',
         convertMeetupTime(member[meetupMembersHeaders.indexOf('Last Access Time')]),
         'TRUE',
       ]);
