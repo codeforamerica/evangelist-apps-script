@@ -24,7 +24,7 @@ function salesforceGetService() {
 }
 
 function salesforceListBrigades() {
-  const soql = 'SELECT Id, Name, Brigade_Type__c, Brigade_Status__c, npe01__One2OneContact__r.Name, npe01__One2OneContact__r.Email, Brigade_Public_Email__c, Website, Site_Link__c, MeetUp_Link__c, MeetUp_Group_ID__c, Brigade_Location__c, Organization_Twitter__c, Github_URL__c, Facebook_Page_URL__c, Brigade_Region__c' +
+  const soql = 'SELECT Id, Name, Brigade_Type__c, Brigade_Status__c, npe01__One2OneContact__r.Name, npe01__One2OneContact__r.Email, Brigade_Public_Email__c, Website, Site_Link__c, MeetUp_Link__c, MeetUp_Group_ID__c, Brigade_Location__c, Organization_Twitter__c, Github_URL__c, Facebook_Page_URL__c, Brigade_Region__c, RecordTypeId' +
     " FROM Account WHERE RecordTypeId = '012d0000001YapjAAC' ORDER BY Name";
   const client = new SalesforceClient();
   return client.query(soql);
