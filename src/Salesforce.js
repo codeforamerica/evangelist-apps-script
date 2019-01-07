@@ -25,7 +25,7 @@ function salesforceGetService() {
 
 function salesforceListBrigades() {
   const soql = 'SELECT Id, Name, Brigade_Type__c, Brigade_Status__c, npe01__One2OneContact__r.Name, npe01__One2OneContact__r.Email, Brigade_Public_Email__c, Website, Site_Link__c, MeetUp_Link__c, MeetUp_Group_ID__c, Brigade_Location__c, Organization_Twitter__c, Github_URL__c, Facebook_Page_URL__c, Brigade_Region__c' +
-    " FROM Account WHERE Brigade_Type__c = 'Brigade' ORDER BY Name";
+    " FROM Account WHERE RecordTypeId = '012d0000001YapjAAC' ORDER BY Name";
   const client = new SalesforceClient();
   return client.query(soql);
 }
@@ -45,7 +45,7 @@ function salesforceListBrigadeLeaders() {
 function salesforceListBrigadeAffiliations() {
   // Sometimes Account.Type is empty(?!?), to be extra safe let's fall back to
   // our custom field.
-  const soql = "SELECT Id, npe5__Contact__c, npe5__Contact__r.Name, npe5__Contact__r.Meetup_User_ID__c, npe5__Organization__c, npe5__Organization__r.Name FROM npe5__Affiliation__c WHERE (npe5__Organization__r.Type = 'Brigade' OR npe5__Organization__r.Brigade_Type__c = 'Brigade') AND Source__c = 'Meetup'";
+  const soql = "SELECT Id, npe5__Contact__c, npe5__Contact__r.Name, npe5__Contact__r.Meetup_User_ID__c, npe5__Organization__c, npe5__Organization__r.Name FROM npe5__Affiliation__c WHERE npe5__Organization__r.RecordTypeId = '012d0000001YapjAAC' AND Source__c = 'Meetup'";
   const client = new SalesforceClient();
   return client.query(soql);
 }

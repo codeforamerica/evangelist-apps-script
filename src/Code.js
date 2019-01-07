@@ -53,20 +53,11 @@ function loadBrigadeInformation() {
  * 4. Run the "salesforceAuthorize" function in the "Salesforce.gs" script
  *    and click the "Authorize" link that appears in the spreadsheet.
  */
-const PARTNER_BRIGADES = [ // grandfather these in for now
-  'Code for Greensboro', 'Code for Kansas City', 'Code for Newark',
-  'Northern Illinois University (Tech Bark)', 'Open Austin',
-  'Sketch City (Houston)',
-];
 /* eslint-disable quote-props */
 const SALESFORCE_HEADERS = [
   ['Brigade Name', b => b.Name],
   ['Salesforce Account ID', b => b.Id],
-  ['Active?', b => b.Brigade_Type__c === 'Brigade' && (
-    b.Brigade_Status__c === 'Active' ||
-    (b.Brigade_Status__c === 'MOU in Process' && PARTNER_BRIGADES.indexOf(b.Name) !== -1) || // Only allow partner brigades in progress
-    b.Brigade_Status__c === 'Signed MOU' // TODO: Remove once the MOU signing process is over
-  )],
+  ['Active?', b => b.Brigade_Type__c === 'Brigade' && b.Brigade_Status__c === 'MOU Signed'],
   ['Website', b => b.Website || b.Site_Link__c],
   ['Meetup URL', b => b.MeetUp_Link__c],
   ['Meetup User ID', b => b.MeetUp_Group_ID__c],
