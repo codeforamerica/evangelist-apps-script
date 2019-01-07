@@ -57,7 +57,7 @@ function loadBrigadeInformation() {
 const SALESFORCE_HEADERS = [
   ['Brigade Name', b => b.Name],
   ['Salesforce Account ID', b => b.Id],
-  ['Active?', b => b.Brigade_Type__c === 'Brigade' && b.Brigade_Status__c === 'MOU Signed'],
+  ['Active?', b => b.Brigade_Type__c === 'Brigade' && b.Brigade_Status__c === 'Signed MOU'],
   ['Website', b => b.Website || b.Site_Link__c],
   ['Meetup URL', b => b.MeetUp_Link__c],
   ['Meetup User ID', b => b.MeetUp_Group_ID__c],
