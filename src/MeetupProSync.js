@@ -36,6 +36,8 @@ function meetupProSyncMembers(incremental) {
       'Meetup ID': currentMember.member_id,
       'Full Name': currentMember.member_name,
       'Email Address': currentMember.email,
+      City: currentMember.city,
+      State: currentMember.state,
       'Events Attended': currentMember.events_attended,
       Chapters: JSON.stringify(currentMember.chapters),
       'Join Time': currentMember.join_time,

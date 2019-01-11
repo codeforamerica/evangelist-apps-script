@@ -74,7 +74,7 @@ const BRIGADES_BY_MEETUP_ID = (function loadBrigadesByMeetupId() {
  * Populates the "Contacts to Create" / "Affiliations to Create"
  */
 const MEETUP_TO_SALESFORCE_CONTACTS_HEADERS = [
-  'Meetup_User_ID__c', 'FirstName', 'LastName', 'Email', 'CfA_Relationship_Types__c', 'Data_Source__c', 'Team_Ownership__c',
+  'Meetup_User_ID__c', 'FirstName', 'LastName', 'Email', 'CfA_Relationship_Types__c', 'Data_Source__c', 'Team_Ownership__c', 'MailingCity', 'MailingState', 'Industry__c',
 ];
 const MEETUP_TO_SALESFORCE_CONTACTS_UPSERT_HEADERS = [
   'Email', 'Meetup_User_ID__c', 'Meetup_Last_Access_Date__c', 'Brigade_Interest__c',
@@ -115,6 +115,9 @@ function meetupToSalesforceLoadRecordsToCreateAndUpdate() {
         'Brigade',
         'Meetup',
         'Brigade Network',
+        member[meetupMembersHeaders.indexOf('City')],
+        member[meetupMembersHeaders.indexOf('State')],
+        'CivicTech'
       ]);
 
       contactsToUpsert.push([
