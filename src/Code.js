@@ -230,8 +230,13 @@ through that list.
 Also, for some reason, "captains@codefortulsa.org" returns an error message
 that the "email is invalid".
 */
-const MANUAL_OVERRIDE_ADD_MEMBER = [
+const MANUAL_OVERRIDE_ASSUME_MEMBER = [
   'captains@codefortulsa.org',
+];
+const MANUAL_OVERRIDE_UNSUBSCRIBE = [ // emails of people who have unsubscribed
+  'terri@li4e.org',
+  'terri@willinghamllc.com',
+  'courtney.brousseau@gmail.com',
 ];
 function loadGroupMembers() {
   const { brigades } = BrigadeList.fromSalesforceSheet(SpreadsheetApp
@@ -267,7 +272,7 @@ function loadGroupMembers() {
   emails.forEach((email) => {
     let groupHasUser;
 
-    if (MANUAL_OVERRIDE_ADD_MEMBER.indexOf(email) === -1) {
+    if (MANUAL_OVERRIDE_ASSUME_MEMBER.indexOf(email) === -1) {
       try {
         groupHasUser = group.hasUser(email);
       } catch (e) {
@@ -277,6 +282,10 @@ function loadGroupMembers() {
       }
     } else {
       groupHasUser = true;
+    }
+
+    if (MANUAL_OVERRIDE_UNSUBSCRIBE !== -1) {
+      groupHasUser = true; // show the user as subscribed, although they have unsubscribed
     }
 
     usersToAppend.push([
