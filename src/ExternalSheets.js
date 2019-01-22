@@ -19,6 +19,7 @@ const EXTERNAL_SHEETS = [
   { sheetId: '1zxyOEOTbkQuJxQSk3h3qAZgakN5XZyNGZT-3QPkzo9k', name: 'Code for Jersey City', meetupUrlname: 'Code-For-Jersey-City' },
   { sheetId: '1mlWT-IHgRYMBq7TsO-g34VIfj7hZ60_2DyZQvZO0Shk', name: 'Civic Data Alliance', meetupUrlname: 'Louisville-Civic-Data-Alliance' },
   { sheetId: '1e7SDp6kF8w8x08qJ6Evel_5WU-5ZSnUrxf3jtjzCVP4', name: 'Open Raleigh Brigade', meetupUrlname: 'Triangle-Code-for-America' },
+  { sheetId: '1asLv_73sGtQUQSkf2EMw2MUxsqguHsuxcCvgSvlEnB8', name: 'Open Savannah', meetupUrlname: 'OpenSavannah' },
 ];
 
 /*
