@@ -59,6 +59,8 @@ global.updateFormBrigadeDropdown = function updateFormBrigadeDropdown() {
     ['17BXzqiA_cYAfpDSILHDnlavQOXV8kHgsYWp4f8ayUt4', 'If you attend Brigade events, which Brigade do you attend?'],
     // NDoCH 2018 signup form
     ['1BDA2LSngoOMw9qqQL4Pmv4K9qzJPeQzFPy6FxkIiGOc', 'Which Brigade is hosting this event?'],
+    // Summit 2018 comp ticket form
+    ['1iw8VK3ZSOL5Ae2m2rh8mMfWnAalHCKOWSiFPiMSWX9U', 'Which Brigade are you a member of?'],
   ].forEach(([formId, questionTitle]) =>
     new UpdateFormBrigadeDropdown(formId, questionTitle).updateField());
 };
