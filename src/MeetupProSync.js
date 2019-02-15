@@ -77,6 +77,8 @@ function meetupProSyncMembers(incremental) {
   console.log('Replacing data with new Meetup members');
   sheet.getRange(2, 1, rowsToAppend.length, sheet.getLastColumn())
     .setValues(rowsToAppend);
+
+  console.log('Finished replacing data with new Meetup members');
 }
 
 function meetupProSyncMembersIncremental() {

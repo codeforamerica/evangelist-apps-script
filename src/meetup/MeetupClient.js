@@ -51,30 +51,24 @@ class MeetupClient {
     const responseBytes = response.getContent().length;
     console.log(`  Got response (Status: ${response.getResponseCode()}; Size: ${responseBytes}b; Ratelimit: ${headers['x-ratelimit-remaining']}/${headers['x-ratelimit-limit']}; Reset in ${headers['x-ratelimit-reset']})`);
 
-    if (typeof headers.Link === 'string') {
-      const parsedHeader = meetupParseLinkHeader(headers.Link);
-      if (parsedHeader.rel) {
-        links[parsedHeader.rel] = parsedHeader.url;
-      } else {
-        console.eror(`Could not parse link header: ${headers.Link}`);
-      }
-    } else if (typeof headers.Link === 'object') { // it's actually an array, but arrays are objects
-      headers.Link
-        .map(meetupParseLinkHeader)
-        .forEach((parsedHeader) => {
-          if (parsedHeader.rel) {
-            links[parsedHeader.rel] = parsedHeader.url;
-          } else {
-            console.error(`Could not parse link header: ${parsedHeader.header}`);
-          }
-        });
-    }
+    headers.Link
+      .split(', ')
+      .map(meetupParseLinkHeader)
+      .forEach((parsedHeader) => {
+        if (parsedHeader.rel) {
+          links[parsedHeader.rel] = parsedHeader.url;
+        } else {
+          console.error(`Could not parse link header: ${parsedHeader.header}`);
+        }
+      });
 
     let recommendedSleepMs;
+    // note: as of Feb 2019, Meetup API seems to no longer include
+    // x-ratelimit-* headers on /pro endpoints?!?
     const ratelimitRemaining = parseInt(headers['x-ratelimit-remaining'], 10);
     const ratelimitReset = parseInt(headers['x-ratelimit-reset'], 10);
 
-    if (ratelimitRemaining >= 10) {
+    if (!ratelimitRemaining || ratelimitRemaining >= 10) {
       recommendedSleepMs = 0;
     } else {
       recommendedSleepMs = 1000 * (ratelimitRemaining <= 1 ?
