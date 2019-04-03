@@ -244,12 +244,17 @@ function loadGroupMembers() {
     .getDataRange().getValues());
   const group = GroupsApp.getGroupByEmail('brigadeleads@codeforamerica.org');
 
-  // First, populate a list of emails to check
+  // First, populate a list of emails to check: both Primary & Public contact
   const emails = [];
   brigades
     .filter(b => b.isActive) // remove missing primary contact & inactive
     .filter(b => b.primaryContactEmail)
     .forEach(b => emails.push(b.primaryContactEmail));
+
+  brigades
+    .filter(b => b.isActive)
+    .filter(b => b.publicContactEmail)
+    .forEach(b => emails.push(b.publicContactEmail));
 
   // ... add in any emails for co-captains that aren't the primary contact:
   const [
