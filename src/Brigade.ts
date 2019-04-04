@@ -1,4 +1,19 @@
 class Brigade {
+  name: string;
+  isActive: boolean;
+  city: string;
+  state: string;
+  region: string;
+  primaryContactName: string;
+  primaryContactEmail: string;
+  publicContactEmail: string;
+  website: string;
+  twitter: string;
+  facebookPageUrl: string;
+  githubUrl: string;
+  meetupUrl: string;
+  salesforceAccountId: string;
+
   constructor(
     name, isActive, city, state, region, primaryContactName, primaryContactEmail,
     publicContactEmail, website, twitter, facebookPageUrl, githubUrl,
@@ -36,6 +51,8 @@ class Brigade {
 }
 
 class BrigadeList {
+  brigades: Array<Brigade>;
+
   constructor(brigades) {
     this.brigades = brigades;
   }
@@ -67,7 +84,4 @@ class BrigadeList {
 }
 
 
-module.exports = {
-  Brigade,
-  BrigadeList,
-};
+export { Brigade, BrigadeList };

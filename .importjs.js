@@ -1,5 +1,5 @@
 module.exports = {
-  declarationKeyword: "const",
+  declarationKeyword: "import",
   environments: [
     'node'
   ]

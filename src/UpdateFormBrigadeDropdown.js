@@ -1,7 +1,7 @@
 const { BrigadeList } = require('./Brigade');
 
 const BRIGADE_LIST_SHEET_ID = SpreadsheetApp.getActive().getId();
-const BRIGADE_LIST_SHEET_NAME = require('./Code.js').SHEET_NAMES.salesforce;
+const BRIGADE_LIST_SHEET_NAME = require('./Code').SHEET_NAMES.salesforce;
 
 class UpdateFormBrigadeDropdown {
   static brigadeNames() {

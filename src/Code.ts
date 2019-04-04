@@ -1,4 +1,5 @@
-const { BrigadeList } = require('./Brigade');
+import { Brigade, BrigadeList } from './Brigade';
+
 const {
   salesforceListBrigades,
   salesforceListDonations,
@@ -18,7 +19,7 @@ const SHEET_NAMES = {
 
 function loadBrigadeInformation() {
   const infoResponse = UrlFetchApp.fetch('https://raw.githubusercontent.com/codeforamerica/brigade-information/master/organizations.json');
-  const info = JSON.parse(infoResponse);
+  const info = JSON.parse(infoResponse.getContentText());
   const brigades = [];
 
   info.forEach((brigade) => {
@@ -53,8 +54,7 @@ function loadBrigadeInformation() {
  * 4. Run the "salesforceAuthorize" function in the "Salesforce.gs" script
  *    and click the "Authorize" link that appears in the spreadsheet.
  */
-/* eslint-disable quote-props */
-const SALESFORCE_HEADERS = [
+const SALESFORCE_HEADERS: Array<[string, (Brigade) => string]> = [
   ['Brigade Name', b => b.Name],
   ['Salesforce Account ID', b => b.Id],
   ['Active?', b => b.RecordTypeId === '012d0000001YapjAAC' && b.Brigade_Status__c === 'Signed MOU'],
@@ -70,7 +70,7 @@ const SALESFORCE_HEADERS = [
   ['Primary Contact Email', b => b.npe01__One2OneContact__r && b.npe01__One2OneContact__r.Email],
   ['Public Contact Email', b => b.Brigade_Public_Email__c],
 ];
-/* eslint-enable quote-props */
+
 function loadSalesforceData() {
   const salesforceBrigades = salesforceListBrigades();
   const brigades =
@@ -239,9 +239,8 @@ const MANUAL_OVERRIDE_UNSUBSCRIBE = [ // emails of people who have unsubscribed
   'courtney.brousseau@gmail.com',
 ];
 function loadGroupMembers() {
-  const { brigades } = BrigadeList.fromSalesforceSheet(SpreadsheetApp
-    .getActive().getSheetByName(SHEET_NAMES.salesforce)
-    .getDataRange().getValues());
+  const { brigades } =
+    BrigadeList.fromSalesforceSheet(SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce).getDataRange().getValues());
   const group = GroupsApp.getGroupByEmail('brigadeleads@codeforamerica.org');
 
   // First, populate a list of emails to check: both Primary & Public contact
@@ -264,7 +263,7 @@ function loadGroupMembers() {
     .getDataRange().getValues();
 
   salesforceBrigadeLeaders.forEach((brigadeLeader) => {
-    const brigadeLeaderEmail = brigadeLeader[salesforceBrigadeLeadersHeaders.indexOf('Email')];
+    const brigadeLeaderEmail = brigadeLeader[salesforceBrigadeLeadersHeaders.indexOf('Email')] as string | null;
 
     if (brigadeLeaderEmail && brigadeLeaderEmail.length &&
       emails.indexOf(brigadeLeaderEmail) === -1) {

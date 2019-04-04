@@ -1,7 +1,7 @@
 const {
   MEETUP_MEMBERSHIP_SPREADSHEET_ID,
 } = require('./MeetupProSync.js');
-const { SHEET_NAMES } = require('./Code.js');
+const { SHEET_NAMES } = require('./Code');
 const { convertMeetupTime } = require('./meetup/MeetupUtil');
 
 /*

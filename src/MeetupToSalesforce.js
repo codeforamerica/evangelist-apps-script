@@ -12,7 +12,7 @@ const {
 } = require('./MeetupProSync.js');
 const {
   SHEET_NAMES,
-} = require('./Code.js');
+} = require('./Code');
 const { rowsToCSV } = require('./Util');
 
 /*

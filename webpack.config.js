@@ -10,6 +10,9 @@ module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   context: __dirname,
   entry: './src/index.js',
+  resolve: {
+    extensions: ['.js', '.ts'],
+  },
   output: {
     filename: 'Code.gs',
     path: path.resolve(__dirname, 'dist'),
@@ -19,11 +22,12 @@ module.exports = {
       {
         // NOTE: we intentionally DO NOT exclude `node_modules` from processing
         // with babel. See the commit 5550905 for details.
-        test: /\.js$/,
+        test: /(\.js|\.ts)$/,
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['google-apps-script'],
+            presets: ['@babel/preset-typescript', '@dreipol/google-apps-script'],
+            plugins: ['@babel/plugin-proposal-class-properties']
           },
         },
       },

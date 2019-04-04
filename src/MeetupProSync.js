@@ -1,6 +1,6 @@
 const {
   SHEET_NAMES,
-} = require('./Code.js');
+} = require('./Code');
 const MeetupClient = require('./meetup/MeetupClient');
 
 

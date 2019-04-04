@@ -3,6 +3,7 @@ module.exports = {
   "plugins": [
     "googleappsscript",
     "jasmine",
+    "typescript",
   ],
   "env": {
     "googleappsscript/googleappsscript": true,

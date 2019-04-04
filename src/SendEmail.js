@@ -1,5 +1,5 @@
 const { BrigadeList } = require('./Brigade');
-const { SHEET_NAMES, loadAll } = require('./Code.js');
+const { SHEET_NAMES, loadAll } = require('./Code');
 const {
   databaseTestBrigadeURLs,
 } = require('./BrigadeDirectory.js');

@@ -3,7 +3,7 @@ const values = require('core-js/library/fn/object/values');
 
 const {
   SHEET_NAMES,
-} = require('./Code.js');
+} = require('./Code');
 const { BrigadeList } = require('./Brigade');
 
 const DATABASE_DOC_ID = '1zglhAKDUNnvKindAhb6K_DJaLQ_myRYGKvE2DTYolAQ';

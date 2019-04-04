@@ -37,7 +37,7 @@ convention:
 
 ## Setup / Instructions:
 ```bash
-# 1. install node and yarn package manager
+# 1. install node and yarn package manager, and typescript (homebrew)
 brew install nodenv
 nodenv install
 npm install -g yarn

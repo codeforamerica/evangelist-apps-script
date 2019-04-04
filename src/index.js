@@ -6,7 +6,7 @@ const {
   loadSalesforceData,
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,
-} = require('./Code.js');
+} = require('./Code');
 const {
   discourseSyncBrigadeList,
 } = require('./Discourse.js');

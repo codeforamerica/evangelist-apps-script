@@ -1,5 +1,5 @@
 const { BrigadeList } = require('./Brigade');
-const { SHEET_NAMES } = require('./Code.js');
+const { SHEET_NAMES } = require('./Code');
 
 const DISCOURSE_ROOT_URL = 'https://discourse.codeforamerica.org';
 
