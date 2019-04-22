@@ -385,7 +385,6 @@ function createTriggers() {
 }
 
 function loadAll() {
-  createUI();
   loadBrigadeInformation();
   loadSalesforceData();
   loadGroupMembers();
@@ -393,6 +392,7 @@ function loadAll() {
 
 module.exports = {
   SHEET_NAMES,
+  createUI,
   createTriggers,
   loadAll,
   loadSalesforceData,
