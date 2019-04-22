@@ -395,6 +395,7 @@ module.exports = {
   createUI,
   createTriggers,
   loadAll,
+  loadGroupMembers,
   loadSalesforceData,
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,

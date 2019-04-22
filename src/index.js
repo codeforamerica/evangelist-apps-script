@@ -2,6 +2,7 @@ const {
   createTriggers,
   createUI,
   loadAll,
+  loadGroupMembers,
   loadSalesforceData,
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,
@@ -42,6 +43,7 @@ global.externalSheetSyncAll = externalSheetSyncAll;
 global.importExternalSalesforceToDirectory = importExternalSalesforceToDirectory;
 global.importInternalSalesforceToDirectory = importInternalSalesforceToDirectory;
 global.loadAll = loadAll;
+global.loadGroupMembers = loadGroupMembers;
 global.loadSalesforceBrigadeLeaders = loadSalesforceBrigadeLeaders;
 global.loadSalesforceData = loadSalesforceData;
 global.loadSalesforceDonationData = loadSalesforceDonationData;
