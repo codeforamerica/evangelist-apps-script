@@ -31,9 +31,9 @@ const {
 } = require('./SendEmail.js');
 const UpdateFormBrigadeDropdown = require('./UpdateFormBrigadeDropdown');
 
-function onOpen(e) { // eslint-disable-line no-unused-vars
+global.onOpen = function onOpen() {
   createUI();
-}
+};
 
 // register all public methods so they can be called by Google Apps Script
 global.createTriggers = createTriggers;
