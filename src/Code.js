@@ -284,7 +284,7 @@ function loadGroupMembers() {
       groupHasUser = true;
     }
 
-    if (MANUAL_OVERRIDE_UNSUBSCRIBE !== -1) {
+    if (MANUAL_OVERRIDE_UNSUBSCRIBE.indexOf(email) !== -1) {
       groupHasUser = true; // show the user as subscribed, although they have unsubscribed
     }
 
