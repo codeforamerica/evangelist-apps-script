@@ -38,7 +38,7 @@ interface SalesforceBrigadePrimaryContact {
   Email: string;
 }
 
-interface SalesforceBrigade {
+export interface SalesforceBrigade {
   Id: string;
   Name: string;
   Brigade_Type__c: string;
@@ -117,7 +117,7 @@ function salesforceAuthCallback(request) {
 }
 global.salesforceAuthCallback = salesforceAuthCallback;
 
-module.exports = {
+export {
   salesforceListBrigades,
   salesforceListDonations,
   salesforceListBrigadeLeaders,

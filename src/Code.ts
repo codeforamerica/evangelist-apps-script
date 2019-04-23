@@ -1,10 +1,9 @@
 import { Brigade, BrigadeList } from './Brigade';
-
-const {
+import {
+  salesforceListBrigadeLeaders,
   salesforceListBrigades,
   salesforceListDonations,
-  salesforceListBrigadeLeaders,
-} = require('./Salesforce.js');
+} from './Salesforce';
 
 const SHEET_NAMES = {
   todo: 'TODO List',
@@ -17,29 +16,20 @@ const SHEET_NAMES = {
   brigadeleads: 'AUTO:brigadeleads',
 };
 
+const BRIGADE_INFO_HEADERS: Array<[string, (b: Brigade) => (string)]> = [
+  ['Brigade Name', b => b.name],
+]
 function loadBrigadeInformation() {
   const infoResponse = UrlFetchApp.fetch('https://raw.githubusercontent.com/codeforamerica/brigade-information/master/organizations.json');
   const info = JSON.parse(infoResponse.getContentText());
-  const brigades: string[][] = [];
-
-  info.forEach((brigade) => {
-    // filter to only the official CfA Brigades
-    if (brigade.tags.indexOf('Code for America') === -1 ||
-        brigade.tags.indexOf('Brigade') === -1 ||
-        brigade.tags.indexOf('Official') === -1) {
-      return;
-    }
-
-    brigades.push([brigade.name as string]);
-  });
+  const brigades = BrigadeList.fromBrigadeInformationJSON(info).brigades;
 
   const sheet = SpreadsheetApp.getActive()
     .getSheetByName(SHEET_NAMES.brigadeInfo);
   sheet.clear();
-  const range = sheet.getRange(1, 1, brigades.length, brigades[0].length);
-  range.setValues(brigades);
+  const range = sheet.getRange(1, 1, brigades.length, BRIGADE_INFO_HEADERS.length);
+  range.setValues(brigades.map(b => BRIGADE_INFO_HEADERS.map(([_, fn]) => fn(b))));
 }
-
 
 /*
  * To set up Salesforce sync, take the following steps:
@@ -247,13 +237,12 @@ function loadGroupMembers() {
   const emails: string[] = [];
   brigades
     .filter(b => b.isActive) // remove missing primary contact & inactive
-    .filter(b => b.primaryContactEmail)
-    .forEach(b => emails.push(b.primaryContactEmail));
+    .forEach(b => b.primaryContactEmail && emails.push(b.primaryContactEmail));
 
   brigades
     .filter(b => b.isActive)
     .filter(b => b.publicContactEmail)
-    .forEach(b => emails.push(b.publicContactEmail));
+    .forEach(b => b.publicContactEmail && emails.push(b.publicContactEmail));
 
   // ... add in any emails for co-captains that aren't the primary contact:
   const [

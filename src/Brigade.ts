@@ -1,18 +1,18 @@
 class Brigade {
   name: string;
   isActive: boolean;
-  city: string;
+  city: string | void;
   state: string;
-  region: string;
-  primaryContactName: string;
-  primaryContactEmail: string;
-  publicContactEmail: string;
+  region: string | void;
+  primaryContactName: string | void;
+  primaryContactEmail: string | void;
+  publicContactEmail: string | void;
   website: string;
   twitter: string;
   facebookPageUrl: string;
   githubUrl: string;
   meetupUrl: string;
-  salesforceAccountId: string;
+  salesforceAccountId: string | void;
 
   constructor(
     name, isActive, city, state, region, primaryContactName, primaryContactEmail,
@@ -53,7 +53,7 @@ class Brigade {
 class BrigadeList {
   brigades: Array<Brigade>;
 
-  constructor(brigades) {
+  constructor(brigades: Array<Brigade>) {
     this.brigades = brigades;
   }
 
@@ -80,6 +80,19 @@ class BrigadeList {
       row[salesforceHeaders.indexOf('Meetup URL')],
       row[salesforceHeaders.indexOf('Salesforce Account ID')],
     )));
+  }
+
+  static fromBrigadeInformationJSON(json) {
+    return new BrigadeList(json.map((brigade) => Brigade.fromObject({
+      name: brigade.name,
+      website: brigade.website,
+      city: brigade.city.includes(',') ? brigade.city.split(', ')[0] : null,
+      state: brigade.city.includes(', ') ? brigade.city.split(', ')[1] : brigade.city,
+      twitter: brigade['social_profiles'].twitter,
+      facebookPageUrl: brigade['social_profiles'].facebook,
+      meetupUrl: brigade.events_url,
+      isActive: brigade.tags.includes('Code for America') && brigade.tags.includes('Brigade') && brigade.tags.indexOf('Official'),
+    })));
   }
 }
 
