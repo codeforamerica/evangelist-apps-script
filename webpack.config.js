@@ -23,13 +23,7 @@ module.exports = {
         // NOTE: we intentionally DO NOT exclude `node_modules` from processing
         // with babel. See the commit 5550905 for details.
         test: /(\.js|\.ts)$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-typescript', '@dreipol/google-apps-script'],
-            plugins: ['@babel/plugin-proposal-class-properties']
-          },
-        },
+        use: 'babel-loader',
       },
     ],
   },

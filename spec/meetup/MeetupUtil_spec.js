@@ -3,7 +3,7 @@ const {
   meetupParseLinkHeader,
 } = require('../../src/meetup/MeetupUtil');
 
-describe('meetupParseLinkHeader', () => {
+describe('meetupParseLinkHeader', function() {
   it('parses a link header', () => {
     this.subject = 'Link: <https://api.meetup.com/pro/brigade/members?page=200&offset=1>; rel="next"';
 
@@ -16,7 +16,7 @@ describe('meetupParseLinkHeader', () => {
   });
 });
 
-describe('convertMeetupTime', () => {
+describe('convertMeetupTime', function() {
   it('converts to the proper date and time', () => {
     this.subject = 1520367649000;
 

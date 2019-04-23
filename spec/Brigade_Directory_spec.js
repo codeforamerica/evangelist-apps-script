@@ -22,7 +22,7 @@ const INACTIVE_BRIGADE_OPTIONS = Object.assign(
   { name: 'Code for Inactive', isActive: false },
 );
 
-describe('BrigadeDirectory', () => {
+describe('BrigadeDirectory', function() {
   beforeEach(() => {
     this.activeBrigade = Brigade.fromObject(VALID_BRIGADE_OPTIONS);
     this.inactiveBrigade = Brigade.fromObject(INACTIVE_BRIGADE_OPTIONS);

@@ -15,7 +15,7 @@ const mockMeetupResponse = (status = 200, headers = {}, body = '{"success": true
   getContentText() { return body; },
 });
 
-describe('MeetupClient', () => {
+describe('MeetupClient', function() {
   beforeEach(() => {
     spyOn(console, 'log');
   });

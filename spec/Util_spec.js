@@ -1,13 +1,13 @@
 /* global describe it expect beforeEach */
 const { csvRowsToJSON, dateToISO8601, rowsToCSV } = require('../src/Util');
 
-describe('dateToISO8601', () => {
+describe('dateToISO8601', function() {
   it('converts dates', () => {
     expect(dateToISO8601(new Date(1530573195000))).toEqual('2018-07-02T23:13:15Z');
   });
 });
 
-describe('rowsToCSV', () => {
+describe('rowsToCSV', function() {
   beforeEach(() => {
     this.data = [
       ['header1', 'header2'],
@@ -37,7 +37,7 @@ describe('rowsToCSV', () => {
   });
 });
 
-describe('csvRowsToJSON', () => {
+describe('csvRowsToJSON', function() {
   beforeEach(() => {
     this.data = [
       ['header1', 'header2'],
