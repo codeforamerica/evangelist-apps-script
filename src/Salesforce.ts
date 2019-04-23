@@ -1,4 +1,14 @@
 /* global OAuth2 */
+declare var global: {
+  salesforceAuthorize: () => void
+  salesforceUnauthorize: () => void
+  salesforceAuthCallback: (any) => any // actually HtmlOutput
+};
+declare var OAuth2: {
+  authorizationUrl: any
+  createService: any
+};
+
 const SalesforceClient = require('./salesforce/SalesforceClient');
 
 function salesforceGetService() {
@@ -21,6 +31,30 @@ function salesforceGetService() {
     .setCallbackFunction('salesforceAuthCallback')
   // Set the property store where authorized tokens should be persisted.
     .setPropertyStore(PropertiesService.getUserProperties());
+}
+
+interface SalesforceBrigadePrimaryContact {
+  Name: string;
+  Email: string;
+}
+
+interface SalesforceBrigade {
+  Id: string;
+  Name: string;
+  Brigade_Type__c: string;
+  Brigade_Status__c: string;
+  npe01__One2OneContact__r: SalesforceBrigadePrimaryContact | null;
+  Brigade_Public_Email__c: string;
+  Website: string;
+  Site_Link__c: string;
+  MeetUp_Link__c: string;
+  MeetUp_Group_ID__c: string;
+  Brigade_Location__c: string;
+  Organization_Twitter__c: string;
+  Github_URL__c: string;
+  Facebook_Page_URL__c: string;
+  Brigade_Region__c: string;
+  RecordTypeId: string;
 }
 
 function salesforceListBrigades() {
@@ -50,7 +84,6 @@ function salesforceListBrigadeAffiliations() {
   return client.query(soql);
 }
 
-// callback from a menu in the spreadsheet
 function salesforceAuthorize() {
   const oauth = salesforceGetService();
   if (oauth.hasAccess()) {
@@ -59,6 +92,7 @@ function salesforceAuthorize() {
     const authorizationUrl = oauth.getAuthorizationUrl();
     const template = HtmlService.createTemplate('<a href="<?= authorizationUrl ?>" target="_blank">Authorize</a>. ' +
         'Reopen the sidebar when the authorization is complete.');
+    // @ts-ignore
     template.authorizationUrl = authorizationUrl;
     const page = template.evaluate();
     SpreadsheetApp.getUi().showSidebar(page);

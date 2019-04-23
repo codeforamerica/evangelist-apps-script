@@ -20,7 +20,7 @@ const SHEET_NAMES = {
 function loadBrigadeInformation() {
   const infoResponse = UrlFetchApp.fetch('https://raw.githubusercontent.com/codeforamerica/brigade-information/master/organizations.json');
   const info = JSON.parse(infoResponse.getContentText());
-  const brigades = [];
+  const brigades: string[][] = [];
 
   info.forEach((brigade) => {
     // filter to only the official CfA Brigades
@@ -30,7 +30,7 @@ function loadBrigadeInformation() {
       return;
     }
 
-    brigades.push([brigade.name]);
+    brigades.push([brigade.name as string]);
   });
 
   const sheet = SpreadsheetApp.getActive()
@@ -54,7 +54,7 @@ function loadBrigadeInformation() {
  * 4. Run the "salesforceAuthorize" function in the "Salesforce.gs" script
  *    and click the "Authorize" link that appears in the spreadsheet.
  */
-const SALESFORCE_HEADERS: Array<[string, (Brigade) => string]> = [
+const SALESFORCE_HEADERS: Array<[string, (b: SalesforceBrigade) => (string | boolean | null)]> = [
   ['Brigade Name', b => b.Name],
   ['Salesforce Account ID', b => b.Id],
   ['Active?', b => b.RecordTypeId === '012d0000001YapjAAC' && b.Brigade_Status__c === 'Signed MOU'],
@@ -108,7 +108,7 @@ const SALESFORCE_DONATION_INCLUDE_BOTH_CONTACT_AND_ACCOUNT_TYPE_WHITELIST = [
 ];
 function loadSalesforceDonationData() {
   const salesforceDonations = salesforceListDonations();
-  const donations = [];
+  const donations: Array<Array<string>> = [];
 
   salesforceDonations.forEach((donation) => {
     /*
@@ -244,7 +244,7 @@ function loadGroupMembers() {
   const group = GroupsApp.getGroupByEmail('brigadeleads@codeforamerica.org');
 
   // First, populate a list of emails to check: both Primary & Public contact
-  const emails = [];
+  const emails: string[] = [];
   brigades
     .filter(b => b.isActive) // remove missing primary contact & inactive
     .filter(b => b.primaryContactEmail)
@@ -272,7 +272,7 @@ function loadGroupMembers() {
   });
 
   // Now, loop over the emails and check each one to see if it's subscribed
-  const usersToAppend = [];
+  const usersToAppend: string[][] = [];
   emails.forEach((email) => {
     let groupHasUser;
 
