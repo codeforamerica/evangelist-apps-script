@@ -1,36 +1,4 @@
-function slackAppAuthCallback(request) {
-  const slackService = getSlackAppService('cfa');
-  const isAuthorized = slackService.handleCallback(request);
-  if (isAuthorized) {
-    return HtmlService.createHtmlOutput('Success! You can close this tab.');
-  }
-  return HtmlService.createHtmlOutput('Denied. You can close this tab');
-}
-
-/*
-for example if more scopes are added.
-*/
-function slackUnauthorize() {
-  const service = getSlackAppService('cfa');
-  service.reset();
-}
-
-function showSlackSidebar() {
-  const slackService = getSlackAppService('cfa');
-
-  if (!slackService.hasAccess()) {
-    const authorizationUrl = slackService.getAuthorizationUrl();
-    Logger.log(authorizationUrl);
-    const template = HtmlService.createTemplate('<a href="<?= authorizationUrl ?>" target="_blank">Authorize</a>. ' +
-        'Reopen the sidebar when the authorization is complete.');
-    template.authorizationUrl = authorizationUrl;
-    const page = template.evaluate();
-    SpreadsheetApp.getUi().showSidebar(page);
-  } else {
-    Logger.log('access granted!');
-    // ...
-  }
-}
+/* global OAuth2 */
 
 function getSlackAppService(workspaceSubdomain) {
   const slackClientId = PropertiesService.getScriptProperties().getProperty('SLACK_CLIENT_ID');
@@ -76,24 +44,6 @@ function getSlackAppService(workspaceSubdomain) {
   // .setParam('approval_prompt', 'force');
 }
 
-function slackHasAccess(subdomainOrArray) {
-  if (Array.isArray(subdomainOrArray)) {
-    const returnValues = [];
-    for (let i = 0; i < subdomainOrArray.length; i++) {
-      const subdomain = subdomainOrArray[i][0];
-
-      if (subdomain) {
-        var slackService = getSlackAppService(subdomain);
-        returnValues.push(slackService.hasAccess());
-      }
-    }
-
-    return returnValues;
-  }
-  var slackService = getSlackAppService(subdomainOrArray);
-  return slackService.hasAccess();
-}
-
 function makeSlackRequest(uri, workspaceSubdomain) {
   const slackService = getSlackAppService(workspaceSubdomain);
   if (!slackService.hasAccess()) {
@@ -129,9 +79,7 @@ function makeSlackPaginatedRequest(uri, workspaceSubdomain, responseKey) {
 
   do {
     const response = makeSlackRequest(uri + (uri.indexOf('?') === -1 ? '?' : '&') + cursorParams, workspaceSubdomain);
-    for (let i = 0; i < response[responseKey].length; i++) {
-      objectsToReturn.push(response[responseKey][i]); // todo: use a oneliner for this
-    }
+    response[responseKey].forEach(obj => objectsToReturn.push(obj));
 
     if (response.response_metadata && response.response_metadata.next_cursor) {
       cursorParams = `limit=100&cursor=${encodeURIComponent(response.response_metadata.next_cursor)}`;
@@ -144,55 +92,12 @@ function makeSlackPaginatedRequest(uri, workspaceSubdomain, responseKey) {
   return objectsToReturn;
 }
 
-function slackChannelsImport() {
-  const channels = makeSlackPaginatedRequest('https://slack.com/api/conversations.list?exclude_members=true&exclude_archived=true', 'cfa', 'channels');
-
-  const channelsToAdd = [
-    ['ID', 'Name', 'Number of Members', 'Channel?', 'Archived?', 'Active (last 3 Months)?'],
-  ];
-  for (let i = 0; i < channels.length; i++) {
-    channelsToAdd.push([
-      channels[i].id,
-      channels[i].name_normalized,
-      channels[i].num_members,
-      channels[i].is_channel,
-      channels[i].is_archived,
-      slackHasPostInLastThreeMonths(channels[i].id),
-    ]);
-  }
-
-  SpreadsheetApp.getActive().getSheetByName('WIP Slack Channels').clear()
-    .getRange(1, 1, channelsToAdd.length, channelsToAdd[0].length)
-    .setValues(channelsToAdd);
-}
-
-function slackUsersImport() {
-  const users = makeSlackPaginatedRequest('https://slack.com/api/users.list', 'cfa', 'members');
-
-  const usersToAdd = [
-    ['ID', 'Display Name', 'Real Name', 'Email', 'Time Zone', 'Deleted?'],
-  ];
-  for (let i = 0; i < users.length; i++) {
-    usersToAdd.push([
-      users[i].id,
-      users[i].profile.display_name,
-      users[i].profile.real_name,
-      users[i].profile.email,
-      users[i].tz,
-      users[i].deleted,
-    ]);
-  }
-
-  SpreadsheetApp.getActive().getSheetByName('WIP Slack Users').clear()
-    .getRange(1, 1, usersToAdd.length, usersToAdd[0].length)
-    .setValues(usersToAdd);
-}
 
 function slackHasPostInLastThreeMonths(channelId) {
-  const threeMonthsAgo = (new Date() - 3 * 30 * 24 * 60 * 60 * 1000) / 1000;
-  let foundMessage = false,
-    hasMorePages,
-    cursor = `oldest=${threeMonthsAgo}`;
+  const threeMonthsAgo = ((new Date() - 3) * 30 * 24 * 60 * 60 * 1000) / 1000;
+  let foundMessage = false;
+  let hasMorePages;
+  let cursor = `oldest=${threeMonthsAgo}`;
 
   do {
     const response = makeSlackRequest(`https://slack.com/api/conversations.history?channel=${channelId}&limit=100&${cursor}`, 'cfa');
@@ -210,3 +115,100 @@ function slackHasPostInLastThreeMonths(channelId) {
 
   return foundMessage;
 }
+
+export function slackAppAuthCallback(request) {
+  const slackService = getSlackAppService('cfa');
+  const isAuthorized = slackService.handleCallback(request);
+  if (isAuthorized) {
+    return HtmlService.createHtmlOutput('Success! You can close this tab.');
+  }
+  return HtmlService.createHtmlOutput('Denied. You can close this tab');
+}
+
+/*
+for example if more scopes are added.
+*/
+export function slackUnauthorize() {
+  const service = getSlackAppService('cfa');
+  service.reset();
+}
+
+export function showSlackSidebar() {
+  const slackService = getSlackAppService('cfa');
+
+  if (!slackService.hasAccess()) {
+    const authorizationUrl = slackService.getAuthorizationUrl();
+    Logger.log(authorizationUrl);
+    const template = HtmlService.createTemplate('<a href="<?= authorizationUrl ?>" target="_blank">Authorize</a>. ' +
+        'Reopen the sidebar when the authorization is complete.');
+    template.authorizationUrl = authorizationUrl;
+    const page = template.evaluate();
+    SpreadsheetApp.getUi().showSidebar(page);
+  } else {
+    Logger.log('access granted!');
+    // ...
+  }
+}
+
+export function slackHasAccess(subdomainOrArray) {
+  if (Array.isArray(subdomainOrArray)) {
+    const returnValues = [];
+
+    subdomainOrArray.forEach((subdomainRow) => {
+      const subdomain = subdomainRow[0];
+
+      if (subdomain) {
+        const subdomainSlackService = getSlackAppService(subdomain);
+        returnValues.push(subdomainSlackService.hasAccess());
+      }
+    });
+  }
+
+  const slackService = getSlackAppService(subdomainOrArray);
+  return slackService.hasAccess();
+}
+
+export function slackChannelsImport() {
+  const channels = makeSlackPaginatedRequest('https://slack.com/api/conversations.list?exclude_members=true&exclude_archived=true', 'cfa', 'channels');
+
+  const channelsToAdd = [
+    ['ID', 'Name', 'Number of Members', 'Channel?', 'Archived?', 'Active (last 3 Months)?'],
+  ];
+  channels.forEach((channel) => {
+    channelsToAdd.push([
+      channel.id,
+      channel.name_normalized,
+      channel.num_members,
+      channel.is_channel,
+      channel.is_archived,
+      slackHasPostInLastThreeMonths(channel.id),
+    ]);
+  });
+
+  SpreadsheetApp.getActive().getSheetByName('WIP Slack Channels').clear()
+    .getRange(1, 1, channelsToAdd.length, channelsToAdd[0].length)
+    .setValues(channelsToAdd);
+}
+
+export function slackUsersImport() {
+  const users = makeSlackPaginatedRequest('https://slack.com/api/users.list', 'cfa', 'members');
+
+  const usersToAdd = [
+    ['ID', 'Display Name', 'Real Name', 'Email', 'Time Zone', 'Deleted?'],
+  ];
+  users.forEach((user) => {
+    usersToAdd.push([
+      user.id,
+      user.profile.display_name,
+      user.profile.real_name,
+      user.profile.email,
+      user.tz,
+      user.deleted,
+    ]);
+  });
+
+  SpreadsheetApp.getActive().getSheetByName('WIP Slack Users').clear()
+    .getRange(1, 1, usersToAdd.length, usersToAdd[0].length)
+    .setValues(usersToAdd);
+}
+
