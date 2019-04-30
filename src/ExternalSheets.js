@@ -21,6 +21,7 @@ const EXTERNAL_SHEETS = [
   { sheetId: '1e7SDp6kF8w8x08qJ6Evel_5WU-5ZSnUrxf3jtjzCVP4', name: 'Open Raleigh Brigade', meetupUrlname: 'Triangle-Code-for-America' },
   { sheetId: '1asLv_73sGtQUQSkf2EMw2MUxsqguHsuxcCvgSvlEnB8', name: 'Open Savannah', meetupUrlname: 'OpenSavannah' },
   { sheetId: '1OxnzHL0l0sHu81EOkK2irBblqSE-9ERPvkBUj_5Ly_s', name: 'KC Digital Drive', meetupUrlname: 'KCBrigade' },
+  { sheetId: '17lg2lReK9BQvi1dE6EXqp5UuPM9fBdl83G8BDR3gd4Y', name: 'Hack for LA', meetupUrlname: 'hackforla' },
 ];
 
 /*
