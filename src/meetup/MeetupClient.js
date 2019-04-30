@@ -51,16 +51,18 @@ class MeetupClient {
     const responseBytes = response.getContent().length;
     console.log(`  Got response (Status: ${response.getResponseCode()}; Size: ${responseBytes}b; Ratelimit: ${headers['x-ratelimit-remaining']}/${headers['x-ratelimit-limit']}; Reset in ${headers['x-ratelimit-reset']})`);
 
-    headers.Link
-      .split(', ')
-      .map(meetupParseLinkHeader)
-      .forEach((parsedHeader) => {
-        if (parsedHeader.rel) {
-          links[parsedHeader.rel] = parsedHeader.url;
-        } else {
-          console.error(`Could not parse link header: ${parsedHeader.header}`);
-        }
-      });
+    if (headers.Link) {
+      headers.Link
+        .split(', ')
+        .map(meetupParseLinkHeader)
+        .forEach((parsedHeader) => {
+          if (parsedHeader.rel) {
+            links[parsedHeader.rel] = parsedHeader.url;
+          } else {
+            console.error(`Could not parse link header: ${parsedHeader.header}`);
+          }
+        });
+    }
 
     let recommendedSleepMs;
     // note: as of Feb 2019, Meetup API seems to no longer include

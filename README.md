@@ -38,6 +38,9 @@ convention:
 ## Setup / Instructions:
 ```bash
 # 1. install node and yarn package manager
+brew install nodenv
+nodenv install
+npm install -g yarn
 # 2. yarn install
 # 3. make some changes in the Google App Script IDE
 # 4. Pull the changes:
