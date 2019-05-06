@@ -6,6 +6,10 @@ This repo hosts Google Apps Script that's useful to me (@tdooner) in my role as 
 * [Live Brigade API Updates](https://docs.google.com/spreadsheets/d/1IM-eKVsCy3a69cWKL_Tdz36sGJCwMxzKYTx4z_jpwAc/edit#gid=1130512200) Google Sheet
 * [Apps Script Project](https://script.google.com/a/codeforamerica.org/macros/d/MTuk3LZlBZufNbA6SvZMFGJhG3lFpo0w5/edit?uiv=2&mid=ACjPJvHVu5iq6vj8fIa3gfb6QXZTX9mXq_gY24KG_Pv0V8AACtYkXqz58GpfXxmZHyNXjvw7q9d6MX-Px_bamIjMkG1dqUFrzJYn4E8NGowMakS1T7vmcqTBT50U2kwyr_0c446mLDDUVA)
 
+## Running
+* `yarn run build` - Build the source files into `dist/Code.gs`
+* `yarn run test [filename]` - Run jasmine tests (optionally limited to `[filename]`)
+
 ## Description
 
 Originally, this started off simple, with just a script to sync Salesforce and the [brigade-information repo][binfo]; however, over time, Apps Script has proven itself a reliable-enough language with sufficient API integrations to be able to do so much more.
@@ -21,10 +25,6 @@ Currenty, the code in this repo does the following:
   * Primary contact emails that are missing or need to be added to `brigadeleads@` list.
 * **Directory:** Populate the public [Brigade Contact Directory](http://c4a.me/brigades) as well as [the internal version](https://docs.google.com/spreadsheets/d/12o5V69MMiYO6sls5V4FLN1_gtgquVlr3mzrncHvQZzI/edit?usp=sharing) that includes the non-public Primary Contact Emails of brigade captains.
 * **Meetup Pro:** Import attendee data from our Meetup account
-
-The following features are works in progress:
-
-* **External Sheets**: Sync Meetup attendee data to external spreadsheets for purposes of sharing email addresses with brigades.
 
 ## Naming Conventions
 The sheets in the Google docs relating to this repo are named according to this
