@@ -5,7 +5,7 @@ import {
   salesforceListDonations,
 } from './Salesforce';
 
-const SHEET_NAMES = {
+export const SHEET_NAMES = {
   todo: 'TODO List',
   brigadeInfo: 'AUTO:brigade-information',
   meetupEvents: 'AUTO:meetup-events',
@@ -384,7 +384,6 @@ function loadAll() {
 }
 
 module.exports = {
-  SHEET_NAMES,
   createUI,
   createTriggers,
   loadAll,

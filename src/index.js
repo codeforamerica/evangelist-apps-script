@@ -1,3 +1,5 @@
+import { discourseSyncBrigadeList } from './Discourse';
+
 const {
   createTriggers,
   createUI,
@@ -7,9 +9,6 @@ const {
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,
 } = require('./Code');
-const {
-  discourseSyncBrigadeList,
-} = require('./Discourse.js');
 const {
   externalSheetSyncAll,
 } = require('./ExternalSheets.js');
@@ -70,6 +69,7 @@ global.updateFormBrigadeDropdown = function updateFormBrigadeDropdown() {
     ['1iw8VK3ZSOL5Ae2m2rh8mMfWnAalHCKOWSiFPiMSWX9U', 'Which Brigade are you a member of?'],
     // record clearance research team form
     ['16BLjhZbshOkjZzGcg41crOxw8OhJuJLryTl-X8sIzlA', 'If you are a member of a Brigade, which one?'],
-  ].forEach(([formId, questionTitle]) =>
-    new UpdateFormBrigadeDropdown(formId, questionTitle).updateField());
+  ].forEach(([formId, questionTitle]) => new UpdateFormBrigadeDropdown(
+    formId, questionTitle,
+  ).updateField());
 };

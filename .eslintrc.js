@@ -1,9 +1,10 @@
 module.exports = {
   "extends": "airbnb-base",
+  "parser": "@typescript-eslint/parser",
   "plugins": [
     "googleappsscript",
     "jasmine",
-    "typescript",
+    "@typescript-eslint",
   ],
   "env": {
     "googleappsscript/googleappsscript": true,
@@ -14,5 +15,14 @@ module.exports = {
     "no-unused-vars": [
       "error", { argsIgnorePattern: '^_$' }
     ]
+  },
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      // use <root>/tsconfig.json
+      "typescript": {},
+    }
   }
 };
