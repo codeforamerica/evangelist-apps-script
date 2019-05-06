@@ -14,7 +14,7 @@
     "@types/node": "^12.0.0",
     "babel-loader": "^8.0.5",
     "copy-webpack-plugin": "^5.0.3",
-    "core-js": "^3.0.1",
+    "core-js-pure": "^3.0.1",
     "full-name-splitter": "^1.1.1",
     "gas-webpack-plugin": "^1.0.2",
     "jasmine": "^3.4.0",

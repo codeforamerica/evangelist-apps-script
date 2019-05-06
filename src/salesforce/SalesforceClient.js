@@ -1,4 +1,4 @@
-const assign = require('core-js/library/fn/object/assign');
+const assign = require('core-js-pure/es/object/assign');
 
 const { csvRowsToJSON } = require('../Util');
 const SalesforceOAuth = require('./SalesforceOAuth');

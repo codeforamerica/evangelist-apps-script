@@ -1,5 +1,5 @@
-const assign = require('core-js/library/fn/object/assign');
-const values = require('core-js/library/fn/object/values');
+const assign = require('core-js-pure/es/object/assign');
+const values = require('core-js-pure/es/object/values');
 
 const {
   SHEET_NAMES,
