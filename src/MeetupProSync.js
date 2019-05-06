@@ -66,8 +66,9 @@ function meetupProSyncMembers(incremental) {
     // prepend rows
     sheet.insertRowsBefore(2, membersToAppend.length);
   } else {
-    // replace all rows
-    sheet.getRange(2, 1, sheet.getLastRow(), sheet.getLastColumn()).clear();
+    // reset the sheet from scratch
+    sheet.deleteRows(2, sheet.getMaxRows() - 2);
+    sheet.insertRows(2, membersToAppend.length);
   }
 
   console.log('Converting Meetup member data format');
