@@ -1,6 +1,6 @@
 import { discourseSyncBrigadeList } from './Discourse';
 
-const {
+import {
   createTriggers,
   createUI,
   loadAll,
@@ -8,7 +8,8 @@ const {
   loadSalesforceData,
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,
-} = require('./Code');
+} from './Code';
+
 const {
   externalSheetSyncAll,
 } = require('./ExternalSheets.js');

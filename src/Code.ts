@@ -1,5 +1,6 @@
 import { Brigade, BrigadeList } from './Brigade';
 import {
+  SalesforceBrigade,
   salesforceListBrigadeLeaders,
   salesforceListBrigades,
   salesforceListDonations,
@@ -61,7 +62,7 @@ const SALESFORCE_HEADERS: Array<[string, (b: SalesforceBrigade) => (string | boo
   ['Public Contact Email', b => b.Brigade_Public_Email__c],
 ];
 
-function loadSalesforceData() {
+export function loadSalesforceData() {
   const salesforceBrigades = salesforceListBrigades();
   const brigades =
     salesforceBrigades.map(brigade => SALESFORCE_HEADERS.map(([_, fn]) => fn(brigade)));
@@ -96,7 +97,7 @@ const SALESFORCE_DONATION_HEADERS = [
 const SALESFORCE_DONATION_INCLUDE_BOTH_CONTACT_AND_ACCOUNT_TYPE_WHITELIST = [
   'Corporation', 'Government', 'Foundation', // types of Account in salesforce
 ];
-function loadSalesforceDonationData() {
+export function loadSalesforceDonationData() {
   const salesforceDonations = salesforceListDonations();
   const donations: Array<Array<string>> = [];
 
@@ -174,7 +175,7 @@ function loadSalesforceDonationData() {
 const SALESFORCE_BRIGADE_LEADERS_HEADERS = [
   'Name', 'Email', 'Brigade Name', 'Affiliation Creation Date',
 ];
-function loadSalesforceBrigadeLeaders() {
+export function loadSalesforceBrigadeLeaders() {
   const salesforceLeaders = salesforceListBrigadeLeaders();
   const leaders = salesforceLeaders.map(leader => [
     leader.npe5__Contact__r.Name,
@@ -228,7 +229,7 @@ const MANUAL_OVERRIDE_UNSUBSCRIBE = [ // emails of people who have unsubscribed
   'terri@willinghamllc.com',
   'courtney.brousseau@gmail.com',
 ];
-function loadGroupMembers() {
+export function loadGroupMembers() {
   const { brigades } =
     BrigadeList.fromSalesforceSheet(SpreadsheetApp.getActive().getSheetByName(SHEET_NAMES.salesforce).getDataRange().getValues());
   const group = GroupsApp.getGroupByEmail('brigadeleads@codeforamerica.org');
@@ -304,7 +305,7 @@ function loadGroupMembers() {
   sheet.setFrozenRows(1);
 }
 
-function createUI() {
+export function createUI() {
   try {
     const ui = SpreadsheetApp.getUi();
     ui.createMenu('Update Data')
@@ -324,7 +325,7 @@ function createUI() {
   }
 }
 
-function createTriggers() {
+export function createTriggers() {
   // remove all existing triggers:
   const existingTriggers = ScriptApp.getProjectTriggers();
   existingTriggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
@@ -377,18 +378,8 @@ function createTriggers() {
     .create(); // 7am Monday
 }
 
-function loadAll() {
+export function loadAll() {
   loadBrigadeInformation();
   loadSalesforceData();
   loadGroupMembers();
 }
-
-module.exports = {
-  createUI,
-  createTriggers,
-  loadAll,
-  loadGroupMembers,
-  loadSalesforceData,
-  loadSalesforceDonationData,
-  loadSalesforceBrigadeLeaders,
-};
