@@ -10,7 +10,18 @@
       "userSymbol": "OAuth2",
       "libraryId": "1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF",
       "version": "24"
+    }, {
+      "userSymbol": "cEs6Shim",
+      "libraryId": "1dvi84vwjD03YUc_-yp4D_fFjIXTK0J8Zk93qtNTPDI0xe2NO35XSv9em",
+      "version": "1"
     }]
   },
-  "exceptionLogging": "STACKDRIVER"
+  "webapp": {
+    "access": "MYSELF",
+    "executeAs": "USER_DEPLOYING"
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "executionApi": {
+    "access": "MYSELF"
+  }
 }

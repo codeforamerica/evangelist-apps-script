@@ -50,6 +50,22 @@ class Brigade {
   }
 }
 
+interface BrigadeInformationJSONEntry {
+  name: string;
+  website: string;
+  city: string;
+  tags: Array<string>;
+  social_profiles?: {
+    twitter: string;
+    facebook: string;
+  };
+  latitude?: string;
+  longitude?: string;
+  events_url?: string;
+  projects_list_url?: string;
+  rss?: string;
+};
+
 class BrigadeList {
   brigades: Array<Brigade>;
 
@@ -83,15 +99,17 @@ class BrigadeList {
   }
 
   static fromBrigadeInformationJSON(json) {
-    return new BrigadeList(json.map((brigade) => Brigade.fromObject({
+    return new BrigadeList(json.map((brigade: BrigadeInformationJSONEntry) => Brigade.fromObject({
       name: brigade.name,
       website: brigade.website,
       city: brigade.city.includes(',') ? brigade.city.split(', ')[0] : null,
       state: brigade.city.includes(', ') ? brigade.city.split(', ')[1] : brigade.city,
-      twitter: brigade['social_profiles'].twitter,
-      facebookPageUrl: brigade['social_profiles'].facebook,
+      twitter: brigade.social_profiles && brigade.social_profiles.twitter,
+      facebookPageUrl: brigade.social_profiles && brigade.social_profiles.facebook,
       meetupUrl: brigade.events_url,
-      isActive: brigade.tags.includes('Code for America') && brigade.tags.includes('Brigade') && brigade.tags.indexOf('Official'),
+      isActive: brigade.tags.indexOf('Code for America') !== -1 &&
+        brigade.tags.indexOf('Brigade') !== -1 &&
+        brigade.tags.indexOf('Official') !== -1,
     })));
   }
 }
