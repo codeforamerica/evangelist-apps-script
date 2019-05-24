@@ -243,10 +243,11 @@ export function loadGroupMembers() {
     .filter(b => b.isActive) // remove missing primary contact & inactive
     .forEach(b => b.primaryContactEmail && emails.push(b.primaryContactEmail));
 
-  brigades
-    .filter(b => b.isActive)
-    .filter(b => b.publicContactEmail)
-    .forEach(b => b.publicContactEmail && emails.push(b.publicContactEmail));
+  // Don't add public contact emails for now
+  // brigades
+  //   .filter(b => b.isActive)
+  //   .filter(b => b.publicContactEmail)
+  //   .forEach(b => b.publicContactEmail && emails.push(b.publicContactEmail));
 
   // ... add in any emails for co-captains that aren't the primary contact:
   const [
