@@ -23,7 +23,10 @@ const BRIGADE_INFO_HEADERS: Array<[string, (b: Brigade) => (string)]> = [
 function loadBrigadeInformation() {
   const infoResponse = UrlFetchApp.fetch('https://raw.githubusercontent.com/codeforamerica/brigade-information/master/organizations.json');
   const info = JSON.parse(infoResponse.getContentText());
-  const brigades = BrigadeList.fromBrigadeInformationJSON(info).brigades;
+  const brigades = BrigadeList
+    .fromBrigadeInformationJSON(info)
+    .brigades
+    .filter(b => b.isActive);
 
   const sheet = SpreadsheetApp.getActive()
     .getSheetByName(SHEET_NAMES.brigadeInfo);
