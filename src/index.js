@@ -1,5 +1,3 @@
-import { discourseSyncBrigadeList } from './Discourse';
-
 import {
   createTriggers,
   createUI,
@@ -9,6 +7,8 @@ import {
   loadSalesforceDonationData,
   loadSalesforceBrigadeLeaders,
 } from './Code';
+import { discourseSyncBrigadeList } from './Discourse';
+import { slackChannelsImport } from './slack/SlackOAuth';
 
 const {
   externalSheetSyncAll,
@@ -58,6 +58,7 @@ global.meetupToSalesforceSync = () => {
   meetupToSalesforceExecute();
 };
 global.sendEmail = sendEmail;
+global.slackChannelsImport = slackChannelsImport;
 global.updateFormBrigadeDropdown = function updateFormBrigadeDropdown() {
   [
     // [form id, question title]

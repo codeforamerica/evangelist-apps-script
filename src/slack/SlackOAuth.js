@@ -94,10 +94,10 @@ function makeSlackPaginatedRequest(uri, workspaceSubdomain, responseKey) {
 
 
 function slackHasPostInLastThreeMonths(channelId) {
-  const threeMonthsAgo = ((new Date() - 3) * 30 * 24 * 60 * 60 * 1000) / 1000;
+  const threeMonthsAgo = new Date() - (3 * 30 * 24 * 60 * 60 * 1000);
   let foundMessage = false;
   let hasMorePages;
-  let cursor = `oldest=${threeMonthsAgo}`;
+  let cursor = `oldest=${threeMonthsAgo / 1000.0}`;
 
   do {
     const response = makeSlackRequest(`https://slack.com/api/conversations.history?channel=${channelId}&limit=100&${cursor}`, 'cfa');
