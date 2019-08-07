@@ -1,6 +1,3 @@
-const assign = require('core-js-pure/es/object/assign');
-const values = require('core-js-pure/es/object/values');
-
 const {
   SHEET_NAMES,
 } = require('./Code');
@@ -41,7 +38,7 @@ class BrigadeDirectory {
     };
 
     if (this.isInternal) {
-      assign(headers, {
+      Object.assign(headers, {
         'Salesforce Account ID': b => b.salesforceAccountId,
       });
     }
@@ -53,7 +50,7 @@ class BrigadeDirectory {
     return this.brigadeList
       .brigades
       .filter(b => b.isActive)
-      .map(b => values(this.headers()).map(fn => fn(b) || ''));
+      .map(b => Object.values(this.headers()).map(fn => fn(b) || ''));
   }
 
   writeToSheet(sheet) {

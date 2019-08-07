@@ -1,5 +1,3 @@
-const assign = require('core-js-pure/es/object/assign');
-
 const { csvRowsToJSON } = require('../Util');
 const SalesforceOAuth = require('./SalesforceOAuth');
 
@@ -158,7 +156,7 @@ class SalesforceClient {
 
     const options = {
       method: method.toLowerCase(),
-      headers: assign({
+      headers: Object.assign({
         Authorization: `Bearer ${this.auth.token()}`,
       }, requestHeaders),
       payload,

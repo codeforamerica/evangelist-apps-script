@@ -1,3 +1,6 @@
+import 'core-js/features/object';
+import 'core-js/features/string';
+
 import {
   createTriggers,
   createUI,
