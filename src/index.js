@@ -1,5 +1,6 @@
-import 'core-js/features/object';
-import 'core-js/features/string';
+import 'core-js/features/object/assign';
+import 'core-js/features/object/values';
+import 'core-js/features/string/includes';
 
 import {
   createTriggers,
