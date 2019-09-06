@@ -339,8 +339,6 @@ export function createTriggers() {
     .timeBased().everyHours(1).create(); // hourly
   ScriptApp.newTrigger('importInternalSalesforceToDirectory')
     .timeBased().everyHours(1).create(); // hourly
-  ScriptApp.newTrigger('meetupProSyncMembersIncremental')
-    .timeBased().everyHours(1).create(); // hourly
   ScriptApp.newTrigger('loadSalesforceData')
     .timeBased().everyHours(1).create(); // hourly
   ScriptApp.newTrigger('updateFormBrigadeDropdown')
@@ -353,28 +351,11 @@ export function createTriggers() {
   ScriptApp.newTrigger('loadSalesforceBrigadeLeaders')
     .timeBased().everyDays(1).atHour(19)
     .create(); // 7pm
-  ScriptApp.newTrigger('meetupProSyncMembersAll')
-    .timeBased().everyDays(1).atHour(19)
-    .create(); // 7pm
 
   // propagate data to brigade dashboards
   ScriptApp.newTrigger('externalSheetSyncAll')
     .timeBased().everyDays(1).atHour(20)
     .create(); // 8pm
-
-  // sync users from meetup -> salesforce
-  ScriptApp.newTrigger('meetupToSalesforceSync')
-    .timeBased().everyDays(1).atHour(23)
-    .create(); // 11pm
-  // sync "1-yr active member count"
-  ScriptApp.newTrigger('meetupToSalesforceSyncActiveCounts')
-    .timeBased().everyDays(1).atHour(23)
-    .create(); // 11pm
-
-  // sync past/upcoming events for all our brigades
-  ScriptApp.newTrigger('meetupProSyncEvents')
-    .timeBased().everyDays(1).atHour(0)
-    .create(); // 12am
 
   // send the overview email
   ScriptApp.newTrigger('sendEmail')
