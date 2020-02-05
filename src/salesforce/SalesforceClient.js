@@ -175,7 +175,7 @@ class SalesforceClient {
     }
 
     if (responseHeaders['Content-Type'] && responseHeaders['Content-Type'].indexOf('application/json') === 0) {
-      const queryResult = Utilities.jsonParse(response.getContentText());
+      const queryResult = JSON.parse(response.getContentText());
       return queryResult;
     }
     return response.getContentText();
